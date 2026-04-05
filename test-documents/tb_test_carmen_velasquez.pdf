@@ -1,0 +1,66 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
+   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+
+4 0 obj
+<< /Length 1734 >>
+stream
+BT /F1 18 Tf 50 750 Td (BAY AREA COMMUNITY HEALTH CENTER) Tj ET
+BT /F1 14 Tf 50 730 Td (1234 Mission Street, San Francisco, CA 94103) Tj ET
+BT /F1 14 Tf 50 710 Td (Phone: \(415\) 555-0200  |  Fax: \(415\) 555-0201) Tj ET
+BT /F1 11 Tf 50 690 Td () Tj ET
+BT /F1 11 Tf 50 670 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 650 Td (     TUBERCULOSIS SKIN TEST \(TST\) RESULT) Tj ET
+BT /F1 11 Tf 50 630 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 610 Td () Tj ET
+BT /F1 11 Tf 50 590 Td (   Patient Name:     Carmen M. Velasquez) Tj ET
+BT /F1 11 Tf 50 570 Td (   Date of Birth:    03/14/1988) Tj ET
+BT /F1 11 Tf 50 550 Td (   Patient ID:       BACH-20260115-0847) Tj ET
+BT /F1 11 Tf 50 530 Td () Tj ET
+BT /F1 11 Tf 50 510 Td (   Test Type:        Mantoux Tuberculin Skin Test \(PPD\)) Tj ET
+BT /F1 11 Tf 50 490 Td (   Date Placed:      01/13/2026) Tj ET
+BT /F1 11 Tf 50 470 Td (   Date Read:        01/15/2026) Tj ET
+BT /F1 11 Tf 50 450 Td (   Read By:          Dr. Susan Park, MD) Tj ET
+BT /F1 11 Tf 50 430 Td () Tj ET
+BT /F1 11 Tf 50 410 Td (   Induration:       0 mm) Tj ET
+BT /F1 11 Tf 50 390 Td (   Result:           NEGATIVE) Tj ET
+BT /F1 11 Tf 50 370 Td () Tj ET
+BT /F1 11 Tf 50 350 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 330 Td (   INTERPRETATION: No evidence of TB infection.) Tj ET
+BT /F1 11 Tf 50 310 Td (   Patient cleared for employment.) Tj ET
+BT /F1 11 Tf 50 290 Td () Tj ET
+BT /F1 11 Tf 50 270 Td (   Physician Signature: Dr. Susan Park, MD) Tj ET
+BT /F1 11 Tf 50 250 Td (   License #: CA-A098712) Tj ET
+BT /F1 11 Tf 50 230 Td () Tj ET
+BT /F1 11 Tf 50 210 Td (   This is a sample document for testing purposes.) Tj ET
+endstream
+endobj
+
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000266 00000 n
+0000002034 00000 n
+
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+2094
+%%EOF

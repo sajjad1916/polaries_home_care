@@ -1,0 +1,66 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
+   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+
+4 0 obj
+<< /Length 1497 >>
+stream
+BT /F1 18 Tf 50 750 Td (STATE OF CALIFORNIA) Tj ET
+BT /F1 14 Tf 50 730 Td (DEPARTMENT OF MOTOR VEHICLES) Tj ET
+BT /F1 14 Tf 50 710 Td (DRIVER LICENSE) Tj ET
+BT /F1 11 Tf 50 690 Td () Tj ET
+BT /F1 11 Tf 50 670 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 650 Td () Tj ET
+BT /F1 11 Tf 50 630 Td (   DL Number:    D7294018) Tj ET
+BT /F1 11 Tf 50 610 Td (   Class:        C) Tj ET
+BT /F1 11 Tf 50 590 Td () Tj ET
+BT /F1 11 Tf 50 570 Td (   Name:         VELASQUEZ, CARMEN MARIA) Tj ET
+BT /F1 11 Tf 50 550 Td (   DOB:          03/14/1988) Tj ET
+BT /F1 11 Tf 50 530 Td (   Sex:          F) Tj ET
+BT /F1 11 Tf 50 510 Td (   Hair:         BRN) Tj ET
+BT /F1 11 Tf 50 490 Td (   Eyes:         BRN) Tj ET
+BT /F1 11 Tf 50 470 Td (   Height:       5-06) Tj ET
+BT /F1 11 Tf 50 450 Td (   Weight:       135 lbs) Tj ET
+BT /F1 11 Tf 50 430 Td () Tj ET
+BT /F1 11 Tf 50 410 Td (   Address:      742 GEARY STREET APT 3B) Tj ET
+BT /F1 11 Tf 50 390 Td (                 SAN FRANCISCO, CA 94109) Tj ET
+BT /F1 11 Tf 50 370 Td () Tj ET
+BT /F1 11 Tf 50 350 Td (   Issue Date:   06/15/2023) Tj ET
+BT /F1 11 Tf 50 330 Td (   Expiration:   03/14/2028) Tj ET
+BT /F1 11 Tf 50 310 Td () Tj ET
+BT /F1 11 Tf 50 290 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 270 Td (   RESTRICTIONS: NONE) Tj ET
+BT /F1 11 Tf 50 250 Td (   ENDORSEMENTS: NONE) Tj ET
+BT /F1 11 Tf 50 230 Td () Tj ET
+BT /F1 11 Tf 50 210 Td (   This is a sample document for testing purposes.) Tj ET
+endstream
+endobj
+
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000266 00000 n
+0000001797 00000 n
+
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1857
+%%EOF

@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Document Upload - Polaris Home Care</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#1B4965;
+  --accent:#62B6CB;
+  --success:#2D6A4F;
+  --danger:#D62828;
+  --warning:#F77F00;
+  --bg:#F8F9FA;
+  --text:#212529;
+  --text-muted:#6C757D;
+  --border:#DEE2E6;
+  --card-bg:#FFFFFF;
+  --radius:10px;
+  --shadow:0 2px 8px rgba(0,0,0,0.08);
+  --shadow-lg:0 4px 20px rgba(0,0,0,0.12);
+}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.6;
+  min-height:100vh;
+}
+
+/* Header */
+.header{
+  background:var(--primary);
+  color:#fff;
+  padding:20px 0;
+  position:sticky;
+  top:0;
+  z-index:100;
+  box-shadow:0 2px 12px rgba(27,73,101,0.3);
+}
+.header-inner{
+  max-width:720px;
+  margin:0 auto;
+  padding:0 20px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:12px;
+}
+.header-logo{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.header-logo svg{flex-shrink:0}
+.header-logo h1{font-size:1.25rem;font-weight:700;letter-spacing:-0.02em}
+.header-logo span{font-size:0.8rem;opacity:0.8;display:block;margin-top:2px}
+.header-badge{
+  background:rgba(255,255,255,0.15);
+  border:1px solid rgba(255,255,255,0.25);
+  border-radius:8px;
+  padding:8px 14px;
+  font-size:0.85rem;
+  text-align:right;
+  line-height:1.4;
+}
+.header-badge strong{display:block;font-size:0.95rem}
+
+/* Container */
+.container{max-width:720px;margin:0 auto;padding:24px 20px 60px}
+
+/* Loading & Error States */
+.state-screen{
+  text-align:center;
+  padding:80px 20px;
+}
+.state-screen h2{font-size:1.5rem;margin-bottom:12px}
+.state-screen p{color:var(--text-muted);font-size:1rem}
+
+.spinner{
+  width:40px;height:40px;
+  border:4px solid var(--border);
+  border-top-color:var(--accent);
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+  margin:0 auto 20px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+.error-icon{
+  width:56px;height:56px;
+  background:var(--danger);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  margin:0 auto 16px;
+  color:#fff;font-size:1.5rem;font-weight:700;
+}
+
+/* Progress Bar */
+.progress-section{
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  padding:20px 24px;
+  box-shadow:var(--shadow);
+  margin-bottom:24px;
+}
+.progress-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:12px;
+}
+.progress-header h2{font-size:1rem;font-weight:600;color:var(--primary)}
+.progress-count{
+  font-size:0.85rem;
+  font-weight:600;
+  color:var(--text-muted);
+}
+.progress-track{
+  height:8px;
+  background:var(--border);
+  border-radius:4px;
+  overflow:hidden;
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--accent),var(--success));
+  border-radius:4px;
+  transition:width 0.5s ease;
+  width:0%;
+}
+.progress-steps{
+  display:flex;
+  justify-content:space-between;
+  margin-top:10px;
+  gap:4px;
+}
+.progress-dot{
+  width:12px;height:12px;
+  border-radius:50%;
+  background:var(--border);
+  transition:background 0.3s ease, transform 0.3s ease;
+  flex-shrink:0;
+}
+.progress-dot.completed{background:var(--success);transform:scale(1.15)}
+.progress-dot.active{background:var(--accent);transform:scale(1.15)}
+
+/* Document Card */
+.doc-card{
+  background:var(--card-bg);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  margin-bottom:16px;
+  border:2px solid transparent;
+  transition:border-color 0.3s ease, box-shadow 0.3s ease;
+  overflow:hidden;
+}
+.doc-card.active{
+  border-color:var(--accent);
+  box-shadow:var(--shadow-lg);
+}
+.doc-card.completed{
+  border-color:var(--success);
+}
+
+.doc-card-header{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:18px 20px;
+  cursor:pointer;
+  user-select:none;
+  transition:background 0.2s;
+}
+.doc-card-header:hover{background:rgba(0,0,0,0.02)}
+
+.doc-step-num{
+  width:36px;height:36px;
+  border-radius:50%;
+  background:var(--border);
+  color:var(--text-muted);
+  display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:0.85rem;
+  flex-shrink:0;
+  transition:all 0.3s ease;
+}
+.doc-card.active .doc-step-num{
+  background:var(--accent);
+  color:#fff;
+}
+.doc-card.completed .doc-step-num{
+  background:var(--success);
+  color:#fff;
+}
+
+.doc-card-title{flex:1}
+.doc-card-title h3{font-size:1rem;font-weight:600;margin-bottom:2px}
+.doc-card-title p{font-size:0.8rem;color:var(--text-muted)}
+
+.doc-status{
+  width:28px;height:28px;
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  transition:all 0.3s ease;
+}
+.doc-status.pending{background:#E9ECEF}
+.doc-status.pending svg{color:var(--text-muted)}
+.doc-status.valid{background:#D4EDDA}
+.doc-status.valid svg{color:var(--success)}
+.doc-status.expired{background:#F8D7DA}
+.doc-status.expired svg{color:var(--danger)}
+.doc-status.warning{background:#FFF3CD}
+.doc-status.warning svg{color:var(--warning)}
+
+.doc-card-body{
+  max-height:0;
+  overflow:hidden;
+  transition:max-height 0.4s ease, padding 0.3s ease;
+  padding:0 20px;
+}
+.doc-card.active .doc-card-body,
+.doc-card.expanded .doc-card-body{
+  max-height:600px;
+  padding:0 20px 20px;
+}
+
+/* Upload Zone */
+.upload-zone{
+  border:2px dashed var(--border);
+  border-radius:var(--radius);
+  padding:32px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.3s ease;
+  background:#FAFBFC;
+  position:relative;
+}
+.upload-zone:hover,
+.upload-zone.dragover{
+  border-color:var(--accent);
+  background:rgba(98,182,203,0.06);
+}
+.upload-zone.has-file{
+  border-color:var(--success);
+  border-style:solid;
+  background:rgba(45,106,79,0.04);
+}
+.upload-zone input[type="file"]{
+  position:absolute;
+  inset:0;
+  opacity:0;
+  cursor:pointer;
+}
+.upload-zone-icon{margin-bottom:10px}
+.upload-zone-text{font-size:0.9rem;color:var(--text-muted)}
+.upload-zone-text strong{color:var(--accent);font-weight:600}
+.upload-zone-hint{font-size:0.75rem;color:var(--text-muted);margin-top:6px}
+
+/* File Preview */
+.file-preview{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px;
+  background:var(--bg);
+  border-radius:8px;
+  margin-top:12px;
+}
+.file-preview-thumb{
+  width:48px;height:48px;
+  border-radius:6px;
+  object-fit:cover;
+  background:var(--border);
+  flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.file-preview-thumb img{width:100%;height:100%;object-fit:cover}
+.file-preview-info{flex:1;min-width:0}
+.file-preview-info .name{font-size:0.85rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.file-preview-info .size{font-size:0.75rem;color:var(--text-muted)}
+.file-preview-remove{
+  background:none;border:none;
+  color:var(--danger);cursor:pointer;
+  padding:6px;border-radius:6px;
+  transition:background 0.2s;
+  flex-shrink:0;
+}
+.file-preview-remove:hover{background:rgba(214,40,40,0.08)}
+
+/* Date Input */
+.date-field{margin-top:14px}
+.date-field label{
+  display:block;
+  font-size:0.85rem;
+  font-weight:500;
+  color:var(--text);
+  margin-bottom:6px;
+}
+.date-field input{
+  width:100%;
+  padding:10px 14px;
+  border:1.5px solid var(--border);
+  border-radius:8px;
+  font-family:inherit;
+  font-size:0.9rem;
+  color:var(--text);
+  outline:none;
+  transition:border-color 0.2s;
+  background:#fff;
+}
+.date-field input:focus{border-color:var(--accent)}
+
+/* Upload Button */
+.upload-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  width:100%;
+  margin-top:16px;
+  padding:12px 20px;
+  background:var(--primary);
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  font-family:inherit;
+  font-size:0.95rem;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+.upload-btn:hover:not(:disabled){background:#153B54;transform:translateY(-1px)}
+.upload-btn:active:not(:disabled){transform:translateY(0)}
+.upload-btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+/* Upload Progress */
+.upload-progress{
+  margin-top:12px;
+  display:none;
+}
+.upload-progress.visible{display:block}
+.upload-progress-bar{
+  height:6px;
+  background:var(--border);
+  border-radius:3px;
+  overflow:hidden;
+}
+.upload-progress-fill{
+  height:100%;
+  background:var(--accent);
+  border-radius:3px;
+  transition:width 0.3s ease;
+  width:0%;
+}
+.upload-progress-text{
+  font-size:0.8rem;
+  color:var(--text-muted);
+  margin-top:6px;
+  text-align:center;
+}
+
+/* Response Message */
+.upload-response{
+  margin-top:12px;
+  padding:10px 14px;
+  border-radius:8px;
+  font-size:0.85rem;
+  display:none;
+}
+.upload-response.visible{display:block}
+.upload-response.success{background:#D4EDDA;color:var(--success);border:1px solid #C3E6CB}
+.upload-response.error{background:#F8D7DA;color:var(--danger);border:1px solid #F5C6CB}
+.upload-response.warning{background:#FFF3CD;color:#856404;border:1px solid #FFEEBA}
+
+/* Completion Banner */
+.completion-banner{
+  background:linear-gradient(135deg,var(--success),#40916C);
+  color:#fff;
+  border-radius:var(--radius);
+  padding:32px 24px;
+  text-align:center;
+  box-shadow:var(--shadow-lg);
+  margin-top:24px;
+  display:none;
+}
+.completion-banner.visible{display:block;animation:fadeInUp 0.6s ease}
+.completion-banner svg{margin-bottom:12px}
+.completion-banner h2{font-size:1.3rem;margin-bottom:8px}
+.completion-banner p{font-size:0.95rem;opacity:0.9;max-width:480px;margin:0 auto}
+
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+
+/* Responsive */
+@media(max-width:480px){
+  .header-inner{flex-direction:column;align-items:flex-start}
+  .header-badge{text-align:left;width:100%}
+  .doc-card-header{padding:14px 16px}
+  .doc-card-body{padding:0 16px}
+  .doc-card.active .doc-card-body,
+  .doc-card.expanded .doc-card-body{padding:0 16px 16px}
+  .upload-zone{padding:24px 16px}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-inner">
+    <div class="header-logo">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none"><circle cx="18" cy="18" r="17" stroke="#62B6CB" stroke-width="2"/><path d="M18 8l2.5 4.5L26 13l-4 3.8 1 5.2-5-2.6L13 22l1-5.2L10 13l5.5-.5z" fill="#62B6CB"/></svg>
+      <div>
+        <h1>Polaris Home Care</h1>
+        <span>Document Upload Portal</span>
+      </div>
+    </div>
+    <div class="header-badge" id="caregiverBadge" style="display:none">
+      <strong id="caregiverName"></strong>
+      <span>ID: <span id="caregiverIdDisplay"></span></span>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <!-- Loading State -->
+  <div class="state-screen" id="loadingState">
+    <div class="spinner"></div>
+    <h2>Loading your profile...</h2>
+    <p>Please wait while we verify your information.</p>
+  </div>
+
+  <!-- Error State -->
+  <div class="state-screen" id="errorState" style="display:none">
+    <div class="error-icon">!</div>
+    <h2 id="errorTitle">Caregiver Not Found</h2>
+    <p id="errorMessage">We could not find a caregiver record for the provided ID. Please check your link and try again, or contact the Polaris Home Care office for assistance.</p>
+  </div>
+
+  <!-- Main Content -->
+  <div id="mainContent" style="display:none">
+    <!-- Progress Section -->
+    <div class="progress-section">
+      <div class="progress-header">
+        <h2>Upload Progress</h2>
+        <span class="progress-count"><span id="uploadedCount">0</span> of 5 documents uploaded</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-steps">
+        <div class="progress-dot active" id="dot-0" title="Driver's License"></div>
+        <div class="progress-dot" id="dot-1" title="TB Test"></div>
+        <div class="progress-dot" id="dot-2" title="Background Check"></div>
+        <div class="progress-dot" id="dot-3" title="Car Insurance"></div>
+        <div class="progress-dot" id="dot-4" title="Social Security Card"></div>
+      </div>
+    </div>
+
+    <!-- Document Cards -->
+    <div id="documentCards"></div>
+
+    <!-- Completion Banner -->
+    <div class="completion-banner" id="completionBanner">
+      <svg width="56" height="56" viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="27" stroke="#fff" stroke-width="2"/><path d="M17 28.5L24 35.5L39 20.5" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <h2>All Documents Uploaded!</h2>
+      <p>Thank you for completing your compliance document uploads. Our team will review your submissions and follow up if anything else is needed.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var DOCUMENT_TYPES = [
+    {
+      key: 'drivers_license',
+      label: "Driver's License",
+      description: 'A valid, non-expired state-issued driver\'s license.',
+      hasDate: true,
+      dateLabel: 'Expiration Date',
+      dateType: 'expiration'
+    },
+    {
+      key: 'tb_test',
+      label: 'TB Test (Skin Test or Chest X-Ray)',
+      description: 'Tuberculosis screening results from your healthcare provider.',
+      hasDate: true,
+      dateLabel: 'Test / Read Date',
+      dateType: 'test'
+    },
+    {
+      key: 'background_check',
+      label: 'Background Check Registration',
+      description: 'Proof of Live Scan or background check registration.',
+      hasDate: true,
+      dateLabel: 'Registration Date',
+      dateType: 'registration'
+    },
+    {
+      key: 'car_insurance',
+      label: 'Car Insurance',
+      description: 'Current automobile insurance declaration page.',
+      hasDate: true,
+      dateLabel: 'Expiration Date',
+      dateType: 'expiration'
+    },
+    {
+      key: 'social_security',
+      label: 'Social Security Card',
+      description: 'A copy of your Social Security card for employment verification.',
+      hasDate: false,
+      dateLabel: null,
+      dateType: null
+    }
+  ];
+
+  var caregiverId = null;
+  var uploadState = {};
+  var activeIndex = 0;
+
+  // Parse caregiver ID from URL: /upload/{id} or ?id={id}
+  function parseCaregiverId() {
+    var pathParts = window.location.pathname.split('/').filter(Boolean);
+    var uploadIdx = pathParts.indexOf('upload');
+    if (uploadIdx !== -1 && pathParts[uploadIdx + 1]) {
+      return pathParts[uploadIdx + 1];
+    }
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('id')) {
+      return params.get('id');
+    }
+    return null;
+  }
+
+  function showError(title, message) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('errorState').style.display = 'block';
+    document.getElementById('errorTitle').textContent = title;
+    document.getElementById('errorMessage').textContent = message;
+  }
+
+  function showMain(caregiver) {
+    document.getElementById('loadingState').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    document.getElementById('caregiverBadge').style.display = 'block';
+    document.getElementById('caregiverName').textContent = caregiver.first_name + ' ' + caregiver.last_name;
+    document.getElementById('caregiverIdDisplay').textContent = caregiver.caregiver_id;
+  }
+
+  // Initialize upload state for each document
+  DOCUMENT_TYPES.forEach(function(doc) {
+    uploadState[doc.key] = {
+      uploaded: false,
+      fileName: null,
+      fileObj: null,
+      filePreviewUrl: null,
+      fileType: null,
+      enteredDate: '',
+      complianceStatus: null,
+      uploading: false
+    };
+  });
+
+  // Build document cards
+  function buildCards() {
+    var container = document.getElementById('documentCards');
+    var html = '';
+
+    DOCUMENT_TYPES.forEach(function(doc, idx) {
+      var isActive = idx === 0;
+      html += '<div class="doc-card' + (isActive ? ' active' : '') + '" id="card-' + idx + '" data-index="' + idx + '" data-key="' + doc.key + '">';
+
+      // Header
+      html += '<div class="doc-card-header" onclick="window.__toggleCard(' + idx + ')">';
+      html += '<div class="doc-step-num" id="step-' + idx + '">' + (idx + 1) + '</div>';
+      html += '<div class="doc-card-title"><h3>' + escapeHtml(doc.label) + '</h3><p>' + escapeHtml(doc.description) + '</p></div>';
+      html += '<div class="doc-status pending" id="status-' + idx + '">';
+      html += '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/></svg>';
+      html += '</div>';
+      html += '</div>';
+
+      // Body
+      html += '<div class="doc-card-body">';
+
+      // Upload zone
+      html += '<div class="upload-zone" id="zone-' + idx + '" ondragover="window.__handleDragOver(event,' + idx + ')" ondragleave="window.__handleDragLeave(event,' + idx + ')" ondrop="window.__handleDrop(event,' + idx + ')">';
+      html += '<input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onchange="window.__handleFileSelect(event,' + idx + ')" id="fileInput-' + idx + '">';
+      html += '<div class="upload-zone-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#E9ECEF"/><path d="M20 14v12M14 20h12" stroke="#6C757D" stroke-width="2" stroke-linecap="round"/></svg></div>';
+      html += '<div class="upload-zone-text"><strong>Click to browse</strong> or drag and drop</div>';
+      html += '<div class="upload-zone-hint">JPEG, PNG, or PDF - Max 10 MB</div>';
+      html += '</div>';
+
+      // File preview
+      html += '<div class="file-preview" id="preview-' + idx + '" style="display:none">';
+      html += '<div class="file-preview-thumb" id="thumb-' + idx + '"></div>';
+      html += '<div class="file-preview-info"><div class="name" id="fileName-' + idx + '"></div><div class="size" id="fileSize-' + idx + '"></div></div>';
+      html += '<button type="button" class="file-preview-remove" onclick="window.__removeFile(' + idx + ')" title="Remove file">';
+      html += '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M4.5 4.5l9 9M13.5 4.5l-9 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+      html += '</button>';
+      html += '</div>';
+
+      // Date field
+      if (doc.hasDate) {
+        html += '<div class="date-field">';
+        html += '<label for="date-' + idx + '">' + escapeHtml(doc.dateLabel) + '</label>';
+        html += '<input type="date" id="date-' + idx + '" onchange="window.__handleDateChange(' + idx + ',this.value)">';
+        html += '</div>';
+      }
+
+      // Upload button
+      html += '<button type="button" class="upload-btn" id="uploadBtn-' + idx + '" onclick="window.__submitUpload(' + idx + ')" disabled>';
+      html += '<svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 14V4M5 7l4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      html += 'Upload ' + escapeHtml(doc.label);
+      html += '</button>';
+
+      // Progress indicator
+      html += '<div class="upload-progress" id="progress-' + idx + '">';
+      html += '<div class="upload-progress-bar"><div class="upload-progress-fill" id="progressFill-' + idx + '"></div></div>';
+      html += '<div class="upload-progress-text" id="progressText-' + idx + '">Uploading...</div>';
+      html += '</div>';
+
+      // Response message
+      html += '<div class="upload-response" id="response-' + idx + '"></div>';
+
+      html += '</div>'; // end body
+      html += '</div>'; // end card
+    });
+
+    container.innerHTML = html;
+
+    // Demo mode: pre-fill date fields with realistic values
+    var demoDates = {
+      0: getFutureDate(18),  // Driver's license expiration: 18 months out
+      1: getPastDate(3),     // TB test read date: 3 months ago
+      2: getPastDate(1),     // Background check registration: 1 month ago
+      3: getFutureDate(8)    // Car insurance expiration: 8 months out
+    };
+    for (var i in demoDates) {
+      var dateEl = document.getElementById('date-' + i);
+      if (dateEl) {
+        dateEl.value = demoDates[i];
+        var docKey = DOCUMENT_TYPES[i].key;
+        uploadState[docKey].enteredDate = demoDates[i];
+      }
+    }
+  }
+
+  function getFutureDate(months) {
+    var d = new Date();
+    d.setMonth(d.getMonth() + months);
+    return d.toISOString().split('T')[0];
+  }
+
+  function getPastDate(months) {
+    var d = new Date();
+    d.setMonth(d.getMonth() - months);
+    return d.toISOString().split('T')[0];
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.appendChild(document.createTextNode(str));
+    return div.innerHTML;
+  }
+
+  // Toggle card expand/collapse
+  window.__toggleCard = function(idx) {
+    activeIndex = idx;
+    var cards = document.querySelectorAll('.doc-card');
+    cards.forEach(function(card, i) {
+      var key = DOCUMENT_TYPES[i].key;
+      var isUploaded = uploadState[key].uploaded;
+      card.classList.remove('active');
+      if (isUploaded) {
+        card.classList.add('completed');
+      }
+      if (i === idx) {
+        card.classList.add('active');
+      }
+    });
+    updateProgressDots();
+  };
+
+  // Drag and drop handlers
+  window.__handleDragOver = function(e, idx) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('zone-' + idx).classList.add('dragover');
+  };
+
+  window.__handleDragLeave = function(e, idx) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('zone-' + idx).classList.remove('dragover');
+  };
+
+  window.__handleDrop = function(e, idx) {
+    e.preventDefault();
+    e.stopPropagation();
+    document.getElementById('zone-' + idx).classList.remove('dragover');
+    var files = e.dataTransfer.files;
+    if (files.length > 0) {
+      processFile(files[0], idx);
+    }
+  };
+
+  window.__handleFileSelect = function(e, idx) {
+    var files = e.target.files;
+    if (files.length > 0) {
+      processFile(files[0], idx);
+    }
+  };
+
+  function processFile(file, idx) {
+    var key = DOCUMENT_TYPES[idx].key;
+    var validTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    var maxSize = 10 * 1024 * 1024;
+
+    if (validTypes.indexOf(file.type) === -1) {
+      showResponse(idx, 'error', 'Invalid file type. Please upload a JPEG, PNG, or PDF file.');
+      return;
+    }
+
+    if (file.size > maxSize) {
+      showResponse(idx, 'error', 'File is too large. Maximum size is 10 MB.');
+      return;
+    }
+
+    uploadState[key].fileObj = file;
+    uploadState[key].fileName = file.name;
+    uploadState[key].fileType = file.type;
+
+    // Revoke old preview URL if it exists
+    if (uploadState[key].filePreviewUrl) {
+      URL.revokeObjectURL(uploadState[key].filePreviewUrl);
+    }
+
+    // Create preview
+    var thumb = document.getElementById('thumb-' + idx);
+    thumb.innerHTML = '';
+
+    if (file.type.startsWith('image/')) {
+      var url = URL.createObjectURL(file);
+      uploadState[key].filePreviewUrl = url;
+      var img = document.createElement('img');
+      img.src = url;
+      img.alt = 'Preview';
+      thumb.appendChild(img);
+    } else {
+      thumb.innerHTML = '<svg width="28" height="28" viewBox="0 0 28 28" fill="none"><rect x="5" y="2" width="18" height="24" rx="2" stroke="#D62828" stroke-width="1.5"/><text x="14" y="18" font-size="7" font-weight="700" fill="#D62828" text-anchor="middle" font-family="Inter,sans-serif">PDF</text></svg>';
+    }
+
+    document.getElementById('fileName-' + idx).textContent = file.name;
+    document.getElementById('fileSize-' + idx).textContent = formatFileSize(file.size);
+    document.getElementById('preview-' + idx).style.display = 'flex';
+    document.getElementById('zone-' + idx).classList.add('has-file');
+
+    hideResponse(idx);
+    updateUploadButton(idx);
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  window.__removeFile = function(idx) {
+    var key = DOCUMENT_TYPES[idx].key;
+    if (uploadState[key].filePreviewUrl) {
+      URL.revokeObjectURL(uploadState[key].filePreviewUrl);
+    }
+    uploadState[key].fileObj = null;
+    uploadState[key].fileName = null;
+    uploadState[key].fileType = null;
+    uploadState[key].filePreviewUrl = null;
+
+    document.getElementById('preview-' + idx).style.display = 'none';
+    document.getElementById('zone-' + idx).classList.remove('has-file');
+    document.getElementById('fileInput-' + idx).value = '';
+
+    hideResponse(idx);
+    updateUploadButton(idx);
+  };
+
+  window.__handleDateChange = function(idx, value) {
+    var key = DOCUMENT_TYPES[idx].key;
+    uploadState[key].enteredDate = value;
+    updateUploadButton(idx);
+  };
+
+  function updateUploadButton(idx) {
+    var doc = DOCUMENT_TYPES[idx];
+    var key = doc.key;
+    var state = uploadState[key];
+    var btn = document.getElementById('uploadBtn-' + idx);
+
+    var hasFile = state.fileObj !== null;
+    var hasDate = !doc.hasDate || (state.enteredDate && state.enteredDate.length > 0);
+    var notUploading = !state.uploading;
+
+    btn.disabled = !(hasFile && hasDate && notUploading);
+  }
+
+  // Submit upload
+  window.__submitUpload = function(idx) {
+    var doc = DOCUMENT_TYPES[idx];
+    var key = doc.key;
+    var state = uploadState[key];
+
+    if (!state.fileObj || state.uploading) return;
+
+    state.uploading = true;
+    updateUploadButton(idx);
+    hideResponse(idx);
+
+    var progressEl = document.getElementById('progress-' + idx);
+    var progressFillEl = document.getElementById('progressFill-' + idx);
+    var progressTextEl = document.getElementById('progressText-' + idx);
+    progressEl.classList.add('visible');
+    progressFillEl.style.width = '0%';
+    progressTextEl.textContent = 'Uploading...';
+
+    var formData = new FormData();
+    formData.append('file', state.fileObj);
+    if (doc.hasDate && state.enteredDate) {
+      formData.append('entered_date', state.enteredDate);
+    }
+    formData.append('uploaded_by', 'caregiver');
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/api/upload/' + encodeURIComponent(caregiverId) + '/' + encodeURIComponent(key));
+
+    xhr.upload.addEventListener('progress', function(e) {
+      if (e.lengthComputable) {
+        var pct = Math.round((e.loaded / e.total) * 100);
+        progressFillEl.style.width = pct + '%';
+        progressTextEl.textContent = 'Uploading... ' + pct + '%';
+      }
+    });
+
+    xhr.addEventListener('load', function() {
+      state.uploading = false;
+      progressEl.classList.remove('visible');
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        var resp;
+        try {
+          resp = JSON.parse(xhr.responseText);
+        } catch(e) {
+          showResponse(idx, 'error', 'Unexpected server response.');
+          updateUploadButton(idx);
+          return;
+        }
+
+        if (resp.success) {
+          state.uploaded = true;
+          state.complianceStatus = resp.document.complianceStatus;
+
+          var statusClass = 'valid';
+          var msg = 'Document uploaded successfully.';
+
+          // Show AI extraction result
+          if (resp.document.aiExtractedDate) {
+            msg += ' AI scanned date: ' + resp.document.aiExtractedDate + '.';
+          }
+
+          if (resp.document.complianceStatus === 'expired') {
+            statusClass = 'expired';
+            msg = 'Document uploaded, but it appears to be expired. Please upload a current version or contact the office.';
+          } else if (resp.document.dateMismatch) {
+            statusClass = 'warning';
+            msg = 'Document uploaded. AI detected date (' + resp.document.aiExtractedDate + ') does not match the date you entered (' + resp.document.enteredDate + '). Our team will review and resolve this.';
+          }
+
+          updateStatusIcon(idx, resp.document.complianceStatus === 'expired' ? 'expired' : (resp.document.dateMismatch ? 'warning' : 'valid'));
+          showResponse(idx, statusClass === 'expired' ? 'warning' : 'success', msg);
+          updateOverallProgress();
+
+          // Auto-advance to next incomplete doc after a short delay
+          setTimeout(function() {
+            advanceToNext(idx);
+          }, 800);
+        } else {
+          showResponse(idx, 'error', resp.error || 'Upload failed.');
+        }
+      } else {
+        var errMsg = 'Upload failed.';
+        try {
+          var errResp = JSON.parse(xhr.responseText);
+          if (errResp.error) errMsg = errResp.error;
+        } catch(e) {}
+        showResponse(idx, 'error', errMsg);
+      }
+      updateUploadButton(idx);
+    });
+
+    xhr.addEventListener('error', function() {
+      state.uploading = false;
+      progressEl.classList.remove('visible');
+      showResponse(idx, 'error', 'Network error. Please check your connection and try again.');
+      updateUploadButton(idx);
+    });
+
+    xhr.addEventListener('timeout', function() {
+      state.uploading = false;
+      progressEl.classList.remove('visible');
+      showResponse(idx, 'error', 'Upload timed out. Please try again.');
+      updateUploadButton(idx);
+    });
+
+    xhr.timeout = 60000;
+    xhr.send(formData);
+  };
+
+  function updateStatusIcon(idx, status) {
+    var el = document.getElementById('status-' + idx);
+    el.className = 'doc-status ' + status;
+
+    if (status === 'valid') {
+      el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.15"/><path d="M5 8.2L7.2 10.4L11.2 5.6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+    } else if (status === 'expired') {
+      el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.15"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    } else if (status === 'warning') {
+      el.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="currentColor" opacity="0.15"/><path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+    }
+  }
+
+  function showResponse(idx, type, message) {
+    var el = document.getElementById('response-' + idx);
+    el.className = 'upload-response visible ' + type;
+    el.textContent = message;
+  }
+
+  function hideResponse(idx) {
+    var el = document.getElementById('response-' + idx);
+    el.className = 'upload-response';
+    el.textContent = '';
+  }
+
+  function updateOverallProgress() {
+    var count = 0;
+    DOCUMENT_TYPES.forEach(function(doc) {
+      if (uploadState[doc.key].uploaded) count++;
+    });
+
+    document.getElementById('uploadedCount').textContent = count;
+    document.getElementById('progressFill').style.width = (count / 5 * 100) + '%';
+    document.getElementById('uploadedCount').textContent = count;
+
+    updateProgressDots();
+
+    if (count === 5) {
+      document.getElementById('completionBanner').classList.add('visible');
+    }
+  }
+
+  function updateProgressDots() {
+    DOCUMENT_TYPES.forEach(function(doc, i) {
+      var dot = document.getElementById('dot-' + i);
+      dot.className = 'progress-dot';
+      if (uploadState[doc.key].uploaded) {
+        dot.classList.add('completed');
+      } else if (i === activeIndex) {
+        dot.classList.add('active');
+      }
+    });
+
+    // Also update card classes
+    var cards = document.querySelectorAll('.doc-card');
+    cards.forEach(function(card, i) {
+      var key = DOCUMENT_TYPES[i].key;
+      card.classList.remove('active', 'completed');
+      if (uploadState[key].uploaded) {
+        card.classList.add('completed');
+      }
+      if (i === activeIndex) {
+        card.classList.add('active');
+      }
+    });
+
+    // Update step number for completed cards
+    DOCUMENT_TYPES.forEach(function(doc, i) {
+      var stepEl = document.getElementById('step-' + i);
+      if (uploadState[doc.key].uploaded) {
+        stepEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 8.2L6.8 11 12 5" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      }
+    });
+  }
+
+  function advanceToNext(currentIdx) {
+    for (var i = 0; i < DOCUMENT_TYPES.length; i++) {
+      var nextIdx = (currentIdx + 1 + i) % DOCUMENT_TYPES.length;
+      if (!uploadState[DOCUMENT_TYPES[nextIdx].key].uploaded) {
+        window.__toggleCard(nextIdx);
+        // Scroll the card into view
+        var cardEl = document.getElementById('card-' + nextIdx);
+        if (cardEl) {
+          cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+    }
+    // All uploaded, stay on current
+    activeIndex = currentIdx;
+    updateProgressDots();
+  }
+
+  // Initialization
+  function init() {
+    caregiverId = parseCaregiverId();
+
+    if (!caregiverId) {
+      showError('Invalid Link', 'No caregiver ID was found in the URL. Please use the link that was provided to you after completing your onboarding application.');
+      return;
+    }
+
+    // Fetch caregiver info
+    fetch('/api/onboarding/status/' + encodeURIComponent(caregiverId))
+      .then(function(res) {
+        if (!res.ok) {
+          if (res.status === 404) {
+            throw new Error('not_found');
+          }
+          throw new Error('server_error');
+        }
+        return res.json();
+      })
+      .then(function(data) {
+        buildCards();
+        showMain(data);
+        updateOverallProgress();
+      })
+      .catch(function(err) {
+        if (err.message === 'not_found') {
+          showError('Caregiver Not Found', 'We could not find a caregiver record for ID "' + caregiverId + '". Please check your link and try again, or contact the Polaris Home Care office for assistance.');
+        } else {
+          showError('Connection Error', 'Unable to connect to the server. Please check your internet connection and try again.');
+        }
+      });
+  }
+
+  // Start
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792]
+   /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>
+endobj
+
+4 0 obj
+<< /Length 1578 >>
+stream
+BT /F1 18 Tf 50 750 Td (PROGRESSIVE INSURANCE) Tj ET
+BT /F1 14 Tf 50 730 Td (AUTOMOBILE INSURANCE ID CARD) Tj ET
+BT /F1 14 Tf 50 710 Td () Tj ET
+BT /F1 11 Tf 50 690 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 670 Td () Tj ET
+BT /F1 11 Tf 50 650 Td (   Policy Number:     916-28-A4729) Tj ET
+BT /F1 11 Tf 50 630 Td (   NAIC Number:       24260) Tj ET
+BT /F1 11 Tf 50 610 Td () Tj ET
+BT /F1 11 Tf 50 590 Td (   Named Insured:) Tj ET
+BT /F1 11 Tf 50 570 Td (   CARMEN M. VELASQUEZ) Tj ET
+BT /F1 11 Tf 50 550 Td (   742 GEARY STREET, APT 3B) Tj ET
+BT /F1 11 Tf 50 530 Td (   SAN FRANCISCO, CA 94109) Tj ET
+BT /F1 11 Tf 50 510 Td () Tj ET
+BT /F1 11 Tf 50 490 Td (   Vehicle:) Tj ET
+BT /F1 11 Tf 50 470 Td (   2019 Honda Civic LX) Tj ET
+BT /F1 11 Tf 50 450 Td (   VIN: 2HGFC2F59KH******) Tj ET
+BT /F1 11 Tf 50 430 Td () Tj ET
+BT /F1 11 Tf 50 410 Td (   Coverage:) Tj ET
+BT /F1 11 Tf 50 390 Td (   Bodily Injury:     $100,000 / $300,000) Tj ET
+BT /F1 11 Tf 50 370 Td (   Property Damage:   $50,000) Tj ET
+BT /F1 11 Tf 50 350 Td (   Uninsured Motor.:  $100,000 / $300,000) Tj ET
+BT /F1 11 Tf 50 330 Td () Tj ET
+BT /F1 11 Tf 50 310 Td (   Effective Date:    01/01/2026) Tj ET
+BT /F1 11 Tf 50 290 Td (   Expiration Date:   01/01/2027) Tj ET
+BT /F1 11 Tf 50 270 Td () Tj ET
+BT /F1 11 Tf 50 250 Td (===================================================) Tj ET
+BT /F1 11 Tf 50 230 Td (   This card must be carried in the insured vehicle.) Tj ET
+BT /F1 11 Tf 50 210 Td () Tj ET
+BT /F1 11 Tf 50 190 Td (   This is a sample document for testing purposes.) Tj ET
+endstream
+endobj
+
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000058 00000 n
+0000000115 00000 n
+0000000266 00000 n
+0000001878 00000 n
+
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1938
+%%EOF

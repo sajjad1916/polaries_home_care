@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Caregiver Onboarding | Polaris Home Care</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #F8F9FA;
+      color: #212529;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1B4965 0%, #1B4965 60%, #2a6080 100%);
+      color: #fff;
+      padding: 32px 20px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+    }
+
+    .header p {
+      font-size: 15px;
+      font-weight: 400;
+      opacity: 0.85;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 24px 16px 48px;
+    }
+
+    .form-section {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 1px 2px rgba(0, 0, 0, 0.06);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .form-section h2 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1B4965;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #62B6CB;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 520px) {
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      display: block;
+      font-size: 14px;
+      font-weight: 500;
+      color: #495057;
+      margin-bottom: 6px;
+    }
+
+    label .required {
+      color: #D62828;
+      margin-left: 2px;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="date"],
+    textarea,
+    select {
+      width: 100%;
+      padding: 10px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      color: #212529;
+      background: #fff;
+      border: 1px solid #CED4DA;
+      border-radius: 8px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23495057' d='M6 8.825L0.375 3.2l.85-.85L6 7.125 10.775 2.35l.85.85z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      outline: none;
+      border-color: #62B6CB;
+      box-shadow: 0 0 0 3px rgba(98, 182, 203, 0.2);
+    }
+
+    input.invalid,
+    textarea.invalid {
+      border-color: #D62828;
+      box-shadow: 0 0 0 3px rgba(214, 40, 40, 0.12);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .signature-area {
+      position: relative;
+    }
+
+    .signature-canvas {
+      width: 100%;
+      height: 180px;
+      border: 2px dashed #CED4DA;
+      border-radius: 8px;
+      cursor: crosshair;
+      touch-action: none;
+      background: #fff;
+    }
+
+    .signature-canvas.signing {
+      border-color: #62B6CB;
+    }
+
+    .signature-canvas.invalid {
+      border-color: #D62828;
+    }
+
+    .signature-hint {
+      text-align: center;
+      font-size: 13px;
+      color: #868E96;
+      margin-top: 6px;
+    }
+
+    .btn-clear-sig {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: #F8F9FA;
+      border: 1px solid #CED4DA;
+      border-radius: 6px;
+      padding: 4px 12px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #495057;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .btn-clear-sig:hover {
+      background: #E9ECEF;
+    }
+
+    .btn-submit {
+      display: block;
+      width: 100%;
+      padding: 14px 24px;
+      background: #1B4965;
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      background: #153d56;
+    }
+
+    .btn-submit:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .btn-submit .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .error-banner {
+      background: #FFF5F5;
+      border: 1px solid #D62828;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 20px;
+      color: #D62828;
+      font-size: 14px;
+      font-weight: 500;
+      display: none;
+    }
+
+    .success-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(27, 73, 101, 0.92);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+
+    .success-overlay.visible {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .success-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 40px 32px;
+      text-align: center;
+      max-width: 420px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+
+    .success-icon {
+      width: 64px;
+      height: 64px;
+      background: #2D6A4F;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .success-icon svg {
+      width: 32px;
+      height: 32px;
+      fill: none;
+      stroke: #fff;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .success-card h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1B4965;
+      margin-bottom: 8px;
+    }
+
+    .success-card .caregiver-id {
+      font-size: 40px;
+      font-weight: 700;
+      color: #2D6A4F;
+      letter-spacing: 6px;
+      margin: 16px 0;
+    }
+
+    .success-card p {
+      font-size: 14px;
+      color: #6C757D;
+      margin-bottom: 4px;
+    }
+
+    .success-card .redirect-msg {
+      margin-top: 20px;
+      font-size: 13px;
+      color: #868E96;
+    }
+
+    .footer-note {
+      text-align: center;
+      font-size: 13px;
+      color: #868E96;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Polaris Home Care</h1>
+    <p>Caregiver Onboarding</p>
+  </div>
+
+  <div class="container">
+    <div id="errorBanner" class="error-banner"></div>
+
+    <form id="onboardingForm" novalidate>
+      <div class="form-section">
+        <h2>Personal Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="first_name">First Name <span class="required">*</span></label>
+            <input type="text" id="first_name" name="first_name" required autocomplete="given-name">
+          </div>
+          <div class="form-group">
+            <label for="last_name">Last Name <span class="required">*</span></label>
+            <input type="text" id="last_name" name="last_name" required autocomplete="family-name">
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" autocomplete="email">
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" autocomplete="tel">
+          </div>
+          <div class="form-group full-width">
+            <label for="date_of_birth">Date of Birth</label>
+            <input type="date" id="date_of_birth" name="date_of_birth">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Address</h2>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="address_street">Street Address</label>
+            <input type="text" id="address_street" name="address_street" autocomplete="street-address">
+          </div>
+          <div class="form-group">
+            <label for="address_city">City</label>
+            <input type="text" id="address_city" name="address_city" autocomplete="address-level2">
+          </div>
+          <div class="form-group">
+            <label for="address_state">State</label>
+            <select id="address_state" name="address_state">
+              <option value="AL">AL</option>
+              <option value="AK">AK</option>
+              <option value="AZ">AZ</option>
+              <option value="AR">AR</option>
+              <option value="CA" selected>CA</option>
+              <option value="CO">CO</option>
+              <option value="CT">CT</option>
+              <option value="DE">DE</option>
+              <option value="FL">FL</option>
+              <option value="GA">GA</option>
+              <option value="HI">HI</option>
+              <option value="ID">ID</option>
+              <option value="IL">IL</option>
+              <option value="IN">IN</option>
+              <option value="IA">IA</option>
+              <option value="KS">KS</option>
+              <option value="KY">KY</option>
+              <option value="LA">LA</option>
+              <option value="ME">ME</option>
+              <option value="MD">MD</option>
+              <option value="MA">MA</option>
+              <option value="MI">MI</option>
+              <option value="MN">MN</option>
+              <option value="MS">MS</option>
+              <option value="MO">MO</option>
+              <option value="MT">MT</option>
+              <option value="NE">NE</option>
+              <option value="NV">NV</option>
+              <option value="NH">NH</option>
+              <option value="NJ">NJ</option>
+              <option value="NM">NM</option>
+              <option value="NY">NY</option>
+              <option value="NC">NC</option>
+              <option value="ND">ND</option>
+              <option value="OH">OH</option>
+              <option value="OK">OK</option>
+              <option value="OR">OR</option>
+              <option value="PA">PA</option>
+              <option value="RI">RI</option>
+              <option value="SC">SC</option>
+              <option value="SD">SD</option>
+              <option value="TN">TN</option>
+              <option value="TX">TX</option>
+              <option value="UT">UT</option>
+              <option value="VT">VT</option>
+              <option value="VA">VA</option>
+              <option value="WA">WA</option>
+              <option value="WV">WV</option>
+              <option value="WI">WI</option>
+              <option value="WY">WY</option>
+              <option value="DC">DC</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="address_zip">ZIP Code</label>
+            <input type="text" id="address_zip" name="address_zip" maxlength="10" autocomplete="postal-code">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Emergency Contact</h2>
+        <div class="form-row">
+          <div class="form-group full-width">
+            <label for="emergency_contact_name">Contact Name</label>
+            <input type="text" id="emergency_contact_name" name="emergency_contact_name">
+          </div>
+          <div class="form-group">
+            <label for="emergency_contact_phone">Contact Phone</label>
+            <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone">
+          </div>
+          <div class="form-group">
+            <label for="emergency_contact_relationship">Relationship</label>
+            <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship">
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>Experience &amp; Availability</h2>
+        <div class="form-group">
+          <label for="prior_experience">Prior Caregiving Experience</label>
+          <textarea id="prior_experience" name="prior_experience" rows="3" placeholder="Describe your relevant work history and experience..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="certifications">Certifications &amp; Licenses</label>
+          <textarea id="certifications" name="certifications" rows="3" placeholder="List any relevant certifications (CNA, HHA, CPR, etc.)..."></textarea>
+        </div>
+        <div class="form-group">
+          <label for="availability">Availability</label>
+          <textarea id="availability" name="availability" rows="3" placeholder="Describe your available days, hours, and any scheduling preferences..."></textarea>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h2>E-Signature</h2>
+        <p style="font-size:14px;color:#495057;margin-bottom:12px;">
+          By signing below, I confirm that the information provided is accurate and complete to the best of my knowledge. <span class="required">*</span>
+        </p>
+        <div class="signature-area">
+          <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+          <button type="button" class="btn-clear-sig" id="clearSignature">Clear</button>
+        </div>
+        <p class="signature-hint">Draw your signature above using your mouse or finger</p>
+      </div>
+
+      <button type="submit" class="btn-submit" id="submitBtn">Submit Onboarding Form</button>
+    </form>
+
+    <p class="footer-note">Polaris Home Care &mdash; San Francisco Bay Area</p>
+  </div>
+
+  <div class="success-overlay" id="successOverlay">
+    <div class="success-card">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+      </div>
+      <h2>Welcome to Polaris!</h2>
+      <p>Your caregiver ID is</p>
+      <div class="caregiver-id" id="caregiverIdDisplay"></div>
+      <p>Please save this ID for your records.</p>
+      <p class="redirect-msg">Redirecting to document upload...</p>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      var canvas = document.getElementById('signatureCanvas');
+      var ctx = canvas.getContext('2d');
+      var isDrawing = false;
+      var hasSigned = false;
+
+      function resizeCanvas() {
+        var rect = canvas.getBoundingClientRect();
+        var dpr = window.devicePixelRatio || 1;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
+        ctx.scale(dpr, dpr);
+        ctx.strokeStyle = '#212529';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+      }
+
+      resizeCanvas();
+      window.addEventListener('resize', function() {
+        var imageData = canvas.toDataURL();
+        resizeCanvas();
+        if (hasSigned) {
+          var img = new Image();
+          img.onload = function() {
+            ctx.drawImage(img, 0, 0, canvas.getBoundingClientRect().width, canvas.getBoundingClientRect().height);
+          };
+          img.src = imageData;
+        }
+      });
+
+      function getPos(e) {
+        var rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches.length > 0) {
+          return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }
+
+      function startDraw(e) {
+        e.preventDefault();
+        isDrawing = true;
+        hasSigned = true;
+        canvas.classList.add('signing');
+        canvas.classList.remove('invalid');
+        var pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        var pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
+
+      function endDraw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        isDrawing = false;
+        canvas.classList.remove('signing');
+      }
+
+      canvas.addEventListener('mousedown', startDraw);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', endDraw);
+      canvas.addEventListener('mouseleave', endDraw);
+      canvas.addEventListener('touchstart', startDraw, { passive: false });
+      canvas.addEventListener('touchmove', draw, { passive: false });
+      canvas.addEventListener('touchend', endDraw);
+      canvas.addEventListener('touchcancel', endDraw);
+
+      document.getElementById('clearSignature').addEventListener('click', function() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSigned = false;
+      });
+
+      // Demo mode: pre-populate all fields with realistic data
+      (function prefillDemo() {
+        var fields = {
+          first_name: 'Carmen',
+          last_name: 'Velasquez',
+          email: 'carmen.velasquez@email.com',
+          phone: '(415) 555-0187',
+          date_of_birth: '1988-03-14',
+          address_street: '742 Geary Street',
+          address_city: 'San Francisco',
+          address_zip: '94109',
+          emergency_contact_name: 'Ricardo Velasquez',
+          emergency_contact_phone: '(415) 555-0299',
+          emergency_contact_relationship: 'Spouse',
+          prior_experience: '3 years of in-home elderly care with Sunrise Senior Living. Specialized in memory care and mobility assistance for clients aged 70+. Experienced with medication reminders, meal preparation, light housekeeping, and transportation to medical appointments.',
+          certifications: 'CNA (Certified Nursing Assistant) - Active\nCPR/First Aid - American Red Cross, expires 2027\nHHA (Home Health Aide) Certification',
+          availability: 'Monday through Friday, 7:00 AM - 6:00 PM. Flexible on weekends with 48-hour notice. Prefer assignments in the San Francisco and Daly City areas.'
+        };
+        for (var key in fields) {
+          var el = document.getElementById(key);
+          if (el) el.value = fields[key];
+        }
+        // Draw a demo signature
+        var w = canvas.getBoundingClientRect().width;
+        var h = canvas.getBoundingClientRect().height;
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1, h * 0.6);
+        ctx.bezierCurveTo(w * 0.2, h * 0.3, w * 0.35, h * 0.7, w * 0.5, h * 0.45);
+        ctx.bezierCurveTo(w * 0.6, h * 0.3, w * 0.7, h * 0.65, w * 0.85, h * 0.4);
+        ctx.stroke();
+        hasSigned = true;
+      })();
+
+      function getSignatureData() {
+        if (!hasSigned) return null;
+        return canvas.toDataURL('image/png');
+      }
+
+      var form = document.getElementById('onboardingForm');
+      var submitBtn = document.getElementById('submitBtn');
+      var errorBanner = document.getElementById('errorBanner');
+
+      function showError(msg) {
+        errorBanner.textContent = msg;
+        errorBanner.style.display = 'block';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function hideError() {
+        errorBanner.style.display = 'none';
+      }
+
+      function setLoading(loading) {
+        if (loading) {
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span class="spinner"></span>Submitting...';
+        } else {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Submit Onboarding Form';
+        }
+      }
+
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        hideError();
+
+        document.querySelectorAll('.invalid').forEach(function(el) {
+          el.classList.remove('invalid');
+        });
+
+        var firstName = document.getElementById('first_name');
+        var lastName = document.getElementById('last_name');
+        var valid = true;
+
+        if (!firstName.value.trim()) {
+          firstName.classList.add('invalid');
+          valid = false;
+        }
+        if (!lastName.value.trim()) {
+          lastName.classList.add('invalid');
+          valid = false;
+        }
+
+        var signatureData = getSignatureData();
+        if (!signatureData) {
+          canvas.classList.add('invalid');
+          valid = false;
+        }
+
+        if (!valid) {
+          showError('Please complete all required fields and provide your signature.');
+          return;
+        }
+
+        var payload = {
+          first_name: firstName.value.trim(),
+          last_name: lastName.value.trim(),
+          email: document.getElementById('email').value.trim(),
+          phone: document.getElementById('phone').value.trim(),
+          date_of_birth: document.getElementById('date_of_birth').value,
+          address_street: document.getElementById('address_street').value.trim(),
+          address_city: document.getElementById('address_city').value.trim(),
+          address_state: document.getElementById('address_state').value,
+          address_zip: document.getElementById('address_zip').value.trim(),
+          emergency_contact_name: document.getElementById('emergency_contact_name').value.trim(),
+          emergency_contact_phone: document.getElementById('emergency_contact_phone').value.trim(),
+          emergency_contact_relationship: document.getElementById('emergency_contact_relationship').value.trim(),
+          prior_experience: document.getElementById('prior_experience').value.trim(),
+          certifications: document.getElementById('certifications').value.trim(),
+          availability: document.getElementById('availability').value.trim(),
+          signature_data: signatureData
+        };
+
+        setLoading(true);
+
+        fetch('/api/onboarding/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        })
+        .then(function(res) {
+          if (!res.ok) {
+            return res.json().then(function(data) {
+              throw new Error(data.error || 'Submission failed. Please try again.');
+            });
+          }
+          return res.json();
+        })
+        .then(function(data) {
+          setLoading(false);
+          var caregiverId = data.caregiver_id || data.caregiverId;
+          document.getElementById('caregiverIdDisplay').textContent = caregiverId;
+          document.getElementById('successOverlay').classList.add('visible');
+          setTimeout(function() {
+            window.location.href = '/upload/' + caregiverId;
+          }, 3000);
+        })
+        .catch(function(err) {
+          setLoading(false);
+          showError(err.message || 'An unexpected error occurred. Please try again.');
+        });
+      });
+    })();
+  </script>
+</body>
+</html>
