@@ -1,4 +1,6 @@
 const bcrypt = require('bcrypt');
+const fs = require('fs');
+const path = require('path');
 const { getDb, closeDb } = require('./database');
 const { migrate } = require('./migrate');
 
@@ -249,13 +251,128 @@ async function seed() {
     )
   `);
 
-  function doc(cid, type, ext, mime, size, date, status, by, opts = {}) {
+  // Generate a real PDF file on disk for each document
+  const uploadsDir = path.resolve(__dirname, '..', 'uploads');
+
+  function generateDocPdf(caregiverId, docType, caregiverName, date) {
+    const templates = {
+      drivers_license: (name, dt) => [
+        'STATE OF CALIFORNIA', 'DEPARTMENT OF MOTOR VEHICLES', 'DRIVER LICENSE', '',
+        '====================================================', '',
+        `   Name:         ${name.toUpperCase()}`,
+        `   DL Number:    D${String(Math.floor(1000000 + Math.random() * 9000000))}`,
+        '   Class:        C', '',
+        `   Issue Date:   ${pastDays(365)}`,
+        `   Expiration:   ${dt || 'N/A'}`, '',
+        '====================================================',
+        '   RESTRICTIONS: NONE', '   ENDORSEMENTS: NONE', '',
+        '   Sample document for compliance portal demo.',
+      ],
+      tb_test: (name, dt) => [
+        'BAY AREA COMMUNITY HEALTH CENTER', '1234 Mission Street, San Francisco, CA 94103', '',
+        '====================================================',
+        '     TUBERCULOSIS SKIN TEST (TST) RESULT', '====================================================', '',
+        `   Patient Name:     ${name}`,
+        `   Test Type:        Mantoux Tuberculin Skin Test (PPD)`,
+        `   Date Read:        ${dt || 'N/A'}`,
+        `   Read By:          Dr. Susan Park, MD`, '',
+        '   Induration:       0 mm', '   Result:           NEGATIVE', '',
+        '====================================================',
+        '   Patient cleared for employment.', '',
+        '   Sample document for compliance portal demo.',
+      ],
+      background_check: (name, dt) => [
+        'STATE OF CALIFORNIA', 'DEPARTMENT OF JUSTICE', 'CAREGIVER BACKGROUND CHECK BUREAU', '',
+        '====================================================',
+        '  HOME CARE AIDE REGISTRATION - CONFIRMATION', '====================================================', '',
+        `   Registration #:   HCA-${new Date().getFullYear()}-${String(Math.floor(100000 + Math.random() * 900000))}`,
+        '   Status:           APPROVED / CLEARED', '',
+        `   Applicant:        ${name.toUpperCase()}`,
+        `   Employer:         POLARIS HOME CARE`, '',
+        `   Registration:     ${dt || 'N/A'}`, '',
+        '   FBI & DOJ:        CLEARED',
+        '   Sex Offender:     CLEARED',
+        '   Child Abuse:      CLEARED', '',
+        '====================================================',
+        '   Sample document for compliance portal demo.',
+      ],
+      car_insurance: (name, dt) => [
+        'PROGRESSIVE INSURANCE', 'AUTOMOBILE INSURANCE ID CARD', '',
+        '====================================================', '',
+        `   Policy #:    ${Math.floor(100 + Math.random() * 900)}-${Math.floor(10 + Math.random() * 90)}-A${Math.floor(1000 + Math.random() * 9000)}`, '',
+        `   Insured:     ${name.toUpperCase()}`, '',
+        '   Vehicle:     2020 Honda Civic LX', '',
+        '   Bodily Injury:     $100,000 / $300,000',
+        '   Property Damage:   $50,000', '',
+        `   Expiration:  ${dt || 'N/A'}`, '',
+        '====================================================',
+        '   Sample document for compliance portal demo.',
+      ],
+      social_security: (name) => [
+        'SOCIAL SECURITY', 'UNITED STATES OF AMERICA', '',
+        '====================================================', '',
+        '', '',
+        `            XXX-XX-${String(Math.floor(1000 + Math.random() * 9000))}`, '', '',
+        `      ${name.toUpperCase()}`, '', '',
+        '====================================================', '',
+        '   THIS NUMBER HAS BEEN ESTABLISHED FOR',
+        `   ${name.toUpperCase()}`, '',
+        '   Sample document for compliance portal demo.',
+        '   NOT A VALID GOVERNMENT DOCUMENT.',
+      ],
+    };
+
+    const lines = (templates[docType] || templates.social_security)(caregiverName, date);
+    const textLines = lines.map((line, i) => {
+      const y = 750 - i * 22;
+      const fontSize = i <= 2 ? (i === 0 ? 16 : 12) : 10;
+      const escaped = line.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
+      return `BT /F1 ${fontSize} Tf 50 ${y} Td (${escaped}) Tj ET`;
+    }).join('\n');
+
+    const pdf = `%PDF-1.4
+1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj
+2 0 obj<</Type/Pages/Kids[3 0 R]/Count 1>>endobj
+3 0 obj<</Type/Page/Parent 2 0 R/MediaBox[0 0 612 792]/Contents 4 0 R/Resources<</Font<</F1 5 0 R>>>>>>endobj
+4 0 obj<</Length ${Buffer.byteLength(textLines)}>>
+stream
+${textLines}
+endstream
+endobj
+5 0 obj<</Type/Font/Subtype/Type1/BaseFont/Helvetica>>endobj
+xref
+0 6
+0000000000 65535 f
+0000000009 00000 n
+0000000052 00000 n
+0000000101 00000 n
+0000000230 00000 n
+${String(283 + Buffer.byteLength(textLines)).padStart(10,'0')} 00000 n
+trailer<</Size 6/Root 1 0 R>>
+startxref
+${340 + Buffer.byteLength(textLines)}
+%%EOF`;
+
+    // Write to uploads dir
+    const dir = path.join(uploadsDir, caregiverId);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    const filePath = path.join(dir, `${docType}.pdf`);
+    fs.writeFileSync(filePath, pdf);
+    return { size: Buffer.byteLength(pdf) };
+  }
+
+  function doc(cid, type, date, status, by, opts = {}) {
+    // Find caregiver name for PDF content
+    const cg = caregivers.find(c => c.caregiver_id === cid);
+    const name = cg ? `${cg.first_name} ${cg.last_name}` : 'Unknown';
+    const { size } = generateDocPdf(cid, type, name, date);
+
     return {
       caregiver_id: cid,
       document_type: type,
-      file_path: `${cid}/${type}.${ext}`,
-      file_name: `${type}.${ext}`,
-      file_type: mime,
+      file_path: `${cid}/${type}.pdf`,
+      file_name: `${type}.pdf`,
+      file_type: 'application/pdf',
       file_size: size,
       entered_date: date,
       ai_extracted_date: opts.aiDate || null,
@@ -271,70 +388,67 @@ async function seed() {
 
   const docs = [
     // ── 1001 Maria Santos (active, COMPLETE) ──
-    doc('1001', 'drivers_license', 'jpg', 'image/jpeg', 245000, future(18), 'valid', 'caregiver', { aiDate: future(18), createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
-    doc('1001', 'tb_test', 'jpg', 'image/jpeg', 189000, past(4), 'valid', 'caregiver', { aiDate: past(4), createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
-    doc('1001', 'background_check', 'pdf', 'application/pdf', 312000, pastDays(175), 'valid', 'admin', { createdAt: pastDays(175), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(175), notes: 'Background check received directly from DOJ.' }),
-    doc('1001', 'car_insurance', 'pdf', 'application/pdf', 156000, future(7), 'valid', 'caregiver', { aiDate: future(7), createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
-    doc('1001', 'social_security', 'jpg', 'image/jpeg', 198000, null, 'valid', 'caregiver', { createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
+    doc('1001', 'drivers_license', future(18), 'valid', 'caregiver', { aiDate: future(18), createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
+    doc('1001', 'tb_test', past(4), 'valid', 'caregiver', { aiDate: past(4), createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
+    doc('1001', 'background_check', pastDays(175), 'valid', 'admin', { createdAt: pastDays(175), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(175), notes: 'Background check received directly from DOJ.' }),
+    doc('1001', 'car_insurance', future(7), 'valid', 'caregiver', { aiDate: future(7), createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
+    doc('1001', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(178), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(177) }),
 
     // ── 1002 James Thompson (active, INCOMPLETE - insurance expired) ──
-    doc('1002', 'drivers_license', 'jpg', 'image/jpeg', 267000, future(14), 'valid', 'caregiver', { aiDate: future(14), createdAt: pastDays(148) }),
-    doc('1002', 'tb_test', 'jpg', 'image/jpeg', 201000, past(8), 'valid', 'caregiver', { createdAt: pastDays(148) }),
-    doc('1002', 'background_check', 'pdf', 'application/pdf', 290000, pastDays(140), 'valid', 'admin', { createdAt: pastDays(140), notes: 'DOJ clearance received.' }),
-    doc('1002', 'car_insurance', 'pdf', 'application/pdf', 143000, past(1), 'expired', 'caregiver', { aiDate: past(1), createdAt: pastDays(148), notes: 'EXPIRED - reminder sent 3/15. James says new policy starts next week.' }),
-    doc('1002', 'social_security', 'jpg', 'image/jpeg', 185000, null, 'valid', 'caregiver', { createdAt: pastDays(148) }),
+    doc('1002', 'drivers_license', future(14), 'valid', 'caregiver', { aiDate: future(14), createdAt: pastDays(148) }),
+    doc('1002', 'tb_test', past(8), 'valid', 'caregiver', { createdAt: pastDays(148) }),
+    doc('1002', 'background_check', pastDays(140), 'valid', 'admin', { createdAt: pastDays(140), notes: 'DOJ clearance received.' }),
+    doc('1002', 'car_insurance', past(1), 'expired', 'caregiver', { aiDate: past(1), createdAt: pastDays(148), notes: 'EXPIRED - reminder sent 3/15.' }),
+    doc('1002', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(148) }),
 
     // ── 1003 Priya Patel (active, COMPLETE) ──
-    doc('1003', 'drivers_license', 'jpg', 'image/jpeg', 231000, future(22), 'valid', 'caregiver', { aiDate: future(22), createdAt: pastDays(318), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
-    doc('1003', 'tb_test', 'pdf', 'application/pdf', 420000, past(10), 'valid', 'caregiver', { createdAt: pastDays(318), notes: 'Chest X-ray (prior TB exposure). X-ray is clear.', verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
-    doc('1003', 'background_check', 'pdf', 'application/pdf', 305000, pastDays(310), 'valid', 'admin', { createdAt: pastDays(310), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(310) }),
-    doc('1003', 'car_insurance', 'pdf', 'application/pdf', 178000, future(4), 'valid', 'caregiver', { aiDate: future(4), createdAt: pastDays(60), notes: 'Renewed policy uploaded 2 months ago.', verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(59) }),
-    doc('1003', 'social_security', 'jpg', 'image/jpeg', 210000, null, 'valid', 'caregiver', { createdAt: pastDays(318), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
+    doc('1003', 'drivers_license', future(22), 'valid', 'caregiver', { aiDate: future(22), createdAt: pastDays(318), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
+    doc('1003', 'tb_test', past(10), 'valid', 'caregiver', { createdAt: pastDays(318), notes: 'Chest X-ray (prior TB exposure). X-ray is clear.', verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
+    doc('1003', 'background_check', pastDays(310), 'valid', 'admin', { createdAt: pastDays(310), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(310) }),
+    doc('1003', 'car_insurance', future(4), 'valid', 'caregiver', { aiDate: future(4), createdAt: pastDays(60), notes: 'Renewed policy uploaded 2 months ago.', verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(59) }),
+    doc('1003', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(318), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
 
     // ── 1004 Robert Johnson (active, INCOMPLETE - DL expired) ──
-    doc('1004', 'drivers_license', 'jpg', 'image/jpeg', 253000, past(2), 'expired', 'caregiver', { aiDate: past(2), createdAt: pastDays(258), notes: 'EXPIRED - Robert has DMV appointment scheduled. Follow up end of month.' }),
-    doc('1004', 'tb_test', 'jpg', 'image/jpeg', 195000, past(6), 'valid', 'caregiver', { createdAt: pastDays(258), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(257) }),
-    doc('1004', 'background_check', 'pdf', 'application/pdf', 298000, pastDays(250), 'valid', 'admin', { createdAt: pastDays(250) }),
-    doc('1004', 'car_insurance', 'pdf', 'application/pdf', 167000, future(9), 'valid', 'caregiver', { aiDate: future(9), createdAt: pastDays(258) }),
-    doc('1004', 'social_security', 'jpg', 'image/jpeg', 192000, null, 'valid', 'caregiver', { createdAt: pastDays(258) }),
+    doc('1004', 'drivers_license', past(2), 'expired', 'caregiver', { aiDate: past(2), createdAt: pastDays(258), notes: 'EXPIRED - DMV appointment scheduled.' }),
+    doc('1004', 'tb_test', past(6), 'valid', 'caregiver', { createdAt: pastDays(258), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(257) }),
+    doc('1004', 'background_check', pastDays(250), 'valid', 'admin', { createdAt: pastDays(250) }),
+    doc('1004', 'car_insurance', future(9), 'valid', 'caregiver', { aiDate: future(9), createdAt: pastDays(258) }),
+    doc('1004', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(258) }),
 
     // ── 1005 Ana Rodriguez (active, COMPLETE) ──
-    doc('1005', 'drivers_license', 'jpg', 'image/jpeg', 240000, future(20), 'valid', 'caregiver', { aiDate: future(20), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
-    doc('1005', 'tb_test', 'jpg', 'image/jpeg', 178000, past(3), 'valid', 'caregiver', { aiDate: past(3), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
-    doc('1005', 'background_check', 'pdf', 'application/pdf', 310000, pastDays(190), 'valid', 'admin', { createdAt: pastDays(190), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(190) }),
-    doc('1005', 'car_insurance', 'pdf', 'application/pdf', 155000, future(5), 'valid', 'caregiver', { aiDate: future(5), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
-    doc('1005', 'social_security', 'jpg', 'image/jpeg', 201000, null, 'valid', 'caregiver', { createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
+    doc('1005', 'drivers_license', future(20), 'valid', 'caregiver', { aiDate: future(20), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
+    doc('1005', 'tb_test', past(3), 'valid', 'caregiver', { aiDate: past(3), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
+    doc('1005', 'background_check', pastDays(190), 'valid', 'admin', { createdAt: pastDays(190), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(190) }),
+    doc('1005', 'car_insurance', future(5), 'valid', 'caregiver', { aiDate: future(5), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
+    doc('1005', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
 
     // ── 1006 David Nguyen (active, COMPLETE) ──
-    doc('1006', 'drivers_license', 'jpg', 'image/jpeg', 258000, future(30), 'valid', 'caregiver', { aiDate: future(30), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
-    doc('1006', 'tb_test', 'jpg', 'image/jpeg', 183000, past(2), 'valid', 'caregiver', { aiDate: past(2), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
-    doc('1006', 'background_check', 'pdf', 'application/pdf', 275000, pastDays(80), 'valid', 'admin', { createdAt: pastDays(80), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(80), notes: 'DOJ clearance. Clean record.' }),
-    doc('1006', 'car_insurance', 'pdf', 'application/pdf', 162000, future(10), 'valid', 'caregiver', { aiDate: future(10), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
-    doc('1006', 'social_security', 'jpg', 'image/jpeg', 195000, null, 'valid', 'caregiver', { createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
+    doc('1006', 'drivers_license', future(30), 'valid', 'caregiver', { aiDate: future(30), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
+    doc('1006', 'tb_test', past(2), 'valid', 'caregiver', { aiDate: past(2), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
+    doc('1006', 'background_check', pastDays(80), 'valid', 'admin', { createdAt: pastDays(80), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(80), notes: 'DOJ clearance. Clean record.' }),
+    doc('1006', 'car_insurance', future(10), 'valid', 'caregiver', { aiDate: future(10), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
+    doc('1006', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
 
     // ── 1007 Sarah Kim (active, INCOMPLETE - missing car insurance) ──
-    doc('1007', 'drivers_license', 'jpg', 'image/jpeg', 237000, future(11), 'valid', 'caregiver', { aiDate: future(11), createdAt: pastDays(118) }),
-    doc('1007', 'tb_test', 'jpg', 'image/jpeg', 190000, past(5), 'valid', 'caregiver', { createdAt: pastDays(118) }),
-    doc('1007', 'background_check', 'pdf', 'application/pdf', 288000, pastDays(110), 'valid', 'admin', { createdAt: pastDays(110) }),
+    doc('1007', 'drivers_license', future(11), 'valid', 'caregiver', { aiDate: future(11), createdAt: pastDays(118) }),
+    doc('1007', 'tb_test', past(5), 'valid', 'caregiver', { createdAt: pastDays(118) }),
+    doc('1007', 'background_check', pastDays(110), 'valid', 'admin', { createdAt: pastDays(110) }),
     // car_insurance MISSING for 1007
-    doc('1007', 'social_security', 'jpg', 'image/jpeg', 188000, null, 'valid', 'caregiver', { createdAt: pastDays(118) }),
+    doc('1007', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(118) }),
 
     // ── 1008 Michael Williams (applicant - partial docs) ──
-    doc('1008', 'drivers_license', 'jpg', 'image/jpeg', 271000, future(24), 'valid', 'caregiver', { aiDate: future(24), mismatch: false, createdAt: pastDays(9) }),
-    doc('1008', 'tb_test', 'jpg', 'image/jpeg', 175000, pastDays(15), 'valid', 'caregiver', { createdAt: pastDays(9) }),
-    doc('1008', 'social_security', 'jpg', 'image/jpeg', 199000, null, 'valid', 'caregiver', { createdAt: pastDays(9) }),
-    // missing: background_check, car_insurance
+    doc('1008', 'drivers_license', future(24), 'valid', 'caregiver', { aiDate: future(24), createdAt: pastDays(9) }),
+    doc('1008', 'tb_test', pastDays(15), 'valid', 'caregiver', { createdAt: pastDays(9) }),
+    doc('1008', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(9) }),
 
     // ── 1009 Linda Garcia (applicant - has some docs, one mismatch) ──
-    doc('1009', 'drivers_license', 'jpg', 'image/jpeg', 248000, future(16), 'valid', 'caregiver', { aiDate: future(15), mismatch: true, createdAt: pastDays(4), notes: 'AI extracted date differs by 1 month from entered date. Needs staff review.' }),
-    doc('1009', 'tb_test', 'pdf', 'application/pdf', 380000, past(1), 'valid', 'caregiver', { createdAt: pastDays(4), notes: 'Chest X-ray submitted. Prior TB exposure.' }),
-    doc('1009', 'car_insurance', 'pdf', 'application/pdf', 151000, future(6), 'valid', 'caregiver', { aiDate: future(6), createdAt: pastDays(4) }),
-    doc('1009', 'social_security', 'jpg', 'image/jpeg', 205000, null, 'valid', 'caregiver', { createdAt: pastDays(4) }),
-    // missing: background_check
+    doc('1009', 'drivers_license', future(16), 'valid', 'caregiver', { aiDate: future(15), mismatch: true, createdAt: pastDays(4), notes: 'AI date differs by 1 month. Needs staff review.' }),
+    doc('1009', 'tb_test', past(1), 'valid', 'caregiver', { createdAt: pastDays(4), notes: 'Chest X-ray submitted. Prior TB exposure.' }),
+    doc('1009', 'car_insurance', future(6), 'valid', 'caregiver', { aiDate: future(6), createdAt: pastDays(4) }),
+    doc('1009', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(4) }),
 
     // ── 1010 Kevin Chen (applicant - just started, minimal docs) ──
-    doc('1010', 'drivers_license', 'jpg', 'image/jpeg', 260000, future(28), 'valid', 'caregiver', { aiDate: future(28), createdAt: pastDays(2) }),
-    // missing: tb_test, background_check, car_insurance, social_security
+    doc('1010', 'drivers_license', future(28), 'valid', 'caregiver', { aiDate: future(28), createdAt: pastDays(2) }),
   ];
 
   for (const d of docs) {
