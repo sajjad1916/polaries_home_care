@@ -46,6 +46,7 @@ async function seed() {
   // ─── Date helpers ──────────────────────────────────────────────
   const today = new Date();
   const future = (months) => { const d = new Date(today); d.setMonth(d.getMonth() + months); return d.toISOString().split('T')[0]; };
+  const futureDays = (days) => { const d = new Date(today); d.setDate(d.getDate() + days); return d.toISOString().split('T')[0]; };
   const past = (months) => { const d = new Date(today); d.setMonth(d.getMonth() - months); return d.toISOString().split('T')[0]; };
   const pastDays = (days) => { const d = new Date(today); d.setDate(d.getDate() - days); return d.toISOString().split('T')[0]; };
   const dob = (year, month, day) => `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
@@ -405,7 +406,7 @@ ${340 + Buffer.byteLength(textLines)}
     doc('1003', 'drivers_license', future(22), 'valid', 'caregiver', { aiDate: future(22), createdAt: pastDays(318), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
     doc('1003', 'tb_test', past(10), 'valid', 'caregiver', { createdAt: pastDays(318), notes: 'Chest X-ray (prior TB exposure). X-ray is clear.', verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
     doc('1003', 'background_check', pastDays(310), 'valid', 'admin', { createdAt: pastDays(310), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(310) }),
-    doc('1003', 'car_insurance', future(4), 'valid', 'caregiver', { aiDate: future(4), createdAt: pastDays(60), notes: 'Renewed policy uploaded 2 months ago.', verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(59) }),
+    doc('1003', 'car_insurance', futureDays(20), 'valid', 'caregiver', { aiDate: futureDays(20), createdAt: pastDays(60), notes: 'Policy expiring soon - renewal needed.', verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(59) }),
     doc('1003', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(318), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(317) }),
 
     // ── 1004 Robert Johnson (active, INCOMPLETE - DL expired) ──
@@ -419,14 +420,14 @@ ${340 + Buffer.byteLength(textLines)}
     doc('1005', 'drivers_license', future(20), 'valid', 'caregiver', { aiDate: future(20), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
     doc('1005', 'tb_test', past(3), 'valid', 'caregiver', { aiDate: past(3), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
     doc('1005', 'background_check', pastDays(190), 'valid', 'admin', { createdAt: pastDays(190), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(190) }),
-    doc('1005', 'car_insurance', future(5), 'valid', 'caregiver', { aiDate: future(5), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
+    doc('1005', 'car_insurance', futureDays(45), 'valid', 'caregiver', { aiDate: futureDays(45), createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
     doc('1005', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(198), verifiedBy: 'Greg Kemper', verifiedAt: pastDays(197) }),
 
     // ── 1006 David Nguyen (active, COMPLETE) ──
     doc('1006', 'drivers_license', future(30), 'valid', 'caregiver', { aiDate: future(30), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
     doc('1006', 'tb_test', past(2), 'valid', 'caregiver', { aiDate: past(2), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
     doc('1006', 'background_check', pastDays(80), 'valid', 'admin', { createdAt: pastDays(80), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(80), notes: 'DOJ clearance. Clean record.' }),
-    doc('1006', 'car_insurance', future(10), 'valid', 'caregiver', { aiDate: future(10), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
+    doc('1006', 'car_insurance', futureDays(75), 'valid', 'caregiver', { aiDate: futureDays(75), createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
     doc('1006', 'social_security', null, 'valid', 'caregiver', { createdAt: pastDays(88), verifiedBy: 'Jessica Reyes', verifiedAt: pastDays(87) }),
 
     // ── 1007 Sarah Kim (active, INCOMPLETE - missing car insurance) ──

@@ -1,8 +1,8 @@
 const express = require('express');
 const { getDb } = require('../../db/database');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 const { getComplianceSummary, updateCaregiverCompliance, getNearestExpiration } = require('../services/compliance');
-const { getFilePath, fileExists } = require('../services/storage');
+const { getFilePath, fileExists, deleteFile } = require('../services/storage');
 const path = require('path');
 
 const router = express.Router();
@@ -83,6 +83,50 @@ router.get('/stats/summary', requireAuth, (req, res) => {
   }
 });
 
+// Recent activity feed (must be before /:caregiverId)
+router.get('/activity/recent', requireAuth, (req, res) => {
+  try {
+    const db = getDb();
+    const entries = db.prepare(`
+      SELECT al.*, au.name as admin_name
+      FROM audit_log al
+      LEFT JOIN admin_users au ON au.id = al.admin_user_id
+      ORDER BY al.created_at DESC
+      LIMIT 15
+    `).all();
+    res.json(entries);
+  } catch (err) {
+    console.error('[caregivers] Activity feed error:', err);
+    res.status(500).json({ error: 'Failed to fetch activity' });
+  }
+});
+
+// Expiring soon documents (must be before /:caregiverId)
+router.get('/expiring-soon', requireAuth, (req, res) => {
+  try {
+    const db = getDb();
+    const today = new Date().toISOString().split('T')[0];
+    const in90 = new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+
+    const rows = db.prepare(`
+      SELECT d.caregiver_id, d.document_type, d.entered_date, d.compliance_status,
+             c.first_name, c.last_name
+      FROM documents d
+      JOIN caregivers c ON c.caregiver_id = d.caregiver_id
+      WHERE d.document_type IN ('drivers_license', 'car_insurance')
+        AND d.compliance_status = 'valid'
+        AND d.entered_date >= ?
+        AND d.entered_date <= ?
+      ORDER BY d.entered_date ASC
+    `).all(today, in90);
+
+    res.json(rows);
+  } catch (err) {
+    console.error('[caregivers] Expiring soon error:', err);
+    res.status(500).json({ error: 'Failed to fetch expiring documents' });
+  }
+});
+
 // Get single caregiver detail
 router.get('/:caregiverId', requireAuth, (req, res) => {
   try {
@@ -160,6 +204,41 @@ router.patch('/:caregiverId', requireAuth, (req, res) => {
   } catch (err) {
     console.error('[caregivers] Update error:', err);
     res.status(500).json({ error: 'Failed to update caregiver' });
+  }
+});
+
+// Delete caregiver (admin only)
+router.delete('/:caregiverId', requireAdmin, (req, res) => {
+  try {
+    const db = getDb();
+    const { caregiverId } = req.params;
+
+    const caregiver = db.prepare('SELECT * FROM caregivers WHERE caregiver_id = ?').get(caregiverId);
+    if (!caregiver) {
+      return res.status(404).json({ error: 'Caregiver not found' });
+    }
+
+    // Delete files from disk
+    const docs = db.prepare('SELECT * FROM documents WHERE caregiver_id = ?').all(caregiverId);
+    for (const doc of docs) {
+      if (doc.file_path) {
+        try { deleteFile(doc.file_path); } catch (e) { /* file may not exist */ }
+      }
+    }
+
+    // Delete DB records
+    db.prepare('DELETE FROM documents WHERE caregiver_id = ?').run(caregiverId);
+    db.prepare('DELETE FROM caregivers WHERE caregiver_id = ?').run(caregiverId);
+
+    // Audit log
+    const name = [caregiver.first_name, caregiver.last_name].filter(Boolean).join(' ');
+    db.prepare('INSERT INTO audit_log (action, entity_type, entity_id, admin_user_id, details) VALUES (?, ?, ?, ?, ?)')
+      .run('delete_caregiver', 'caregiver', caregiverId, req.admin.id, JSON.stringify({ name }));
+
+    res.json({ success: true });
+  } catch (err) {
+    console.error('[caregivers] Delete error:', err);
+    res.status(500).json({ error: 'Failed to delete caregiver' });
   }
 });
 

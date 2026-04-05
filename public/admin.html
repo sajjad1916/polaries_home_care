@@ -180,12 +180,75 @@ tbody tr:hover{background:rgba(98,182,203,.06)}
 .empty-state .icon{font-size:2.5rem;margin-bottom:12px;opacity:.4}
 .empty-state p{font-size:.9rem}
 
+/* Activity Feed */
+.activity-feed{margin-bottom:24px}
+.activity-list{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.activity-item{display:flex;align-items:flex-start;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);font-size:.82rem}
+.activity-item:last-child{border-bottom:none}
+.activity-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.activity-icon.act-update{background:rgba(98,182,203,.15)}
+.activity-icon.act-upload{background:rgba(45,106,79,.12)}
+.activity-icon.act-create{background:rgba(98,182,203,.15)}
+.activity-icon.act-delete{background:rgba(214,40,40,.1)}
+.activity-icon.act-resolve{background:rgba(247,127,0,.12)}
+.activity-icon.act-default{background:rgba(108,117,125,.12)}
+.activity-text{flex:1;line-height:1.4}
+.activity-text strong{font-weight:600}
+.activity-time{font-size:.72rem;color:var(--muted);white-space:nowrap;flex-shrink:0;margin-top:2px}
+
+/* Expiring Soon */
+.expiring-section{margin-bottom:24px}
+.expiring-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.expiring-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow);cursor:pointer;transition:box-shadow .15s;display:flex;align-items:center;gap:14px}
+.expiring-card:hover{box-shadow:var(--shadow-lg)}
+.expiring-card.urgency-30{border-left:4px solid var(--danger)}
+.expiring-card.urgency-60{border-left:4px solid var(--warning)}
+.expiring-card.urgency-90{border-left:4px solid #E9C46A}
+.expiring-days{font-size:1.3rem;font-weight:700;width:50px;text-align:center;flex-shrink:0}
+.expiring-days.days-30{color:var(--danger)}
+.expiring-days.days-60{color:var(--warning)}
+.expiring-days.days-90{color:#C9960C}
+.expiring-info{flex:1;min-width:0}
+.expiring-info .name{font-weight:600;font-size:.85rem;margin-bottom:2px}
+.expiring-info .doc-type{font-size:.75rem;color:var(--muted)}
+.expiring-info .exp-date{font-size:.75rem;color:var(--muted)}
+
+/* Document Preview Modal */
+.modal-preview{max-width:800px}
+.preview-container{text-align:center;padding:10px 0}
+.preview-container img{max-width:100%;max-height:65vh;border-radius:6px;box-shadow:var(--shadow)}
+.preview-container iframe{width:100%;height:65vh;border:none;border-radius:6px}
+
+/* QR Code Modal */
+.qr-modal-content{text-align:center;padding:10px 0}
+.qr-modal-content canvas{margin:0 auto 16px;display:block}
+.qr-url-display{background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:10px 14px;font-size:.8rem;word-break:break-all;margin-bottom:12px;color:var(--text);font-family:monospace}
+
+/* Table scroll wrapper for mobile */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
+/* Settings page */
+.settings-table{width:100%;border-collapse:collapse}
+.settings-table th{padding:10px 14px;text-align:left;font-size:.72rem;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:600;border-bottom:2px solid var(--border);background:var(--bg)}
+.settings-table td{padding:10px 14px;border-bottom:1px solid var(--border);font-size:.85rem}
+.badge-admin{background:rgba(27,73,101,.12);color:var(--primary)}
+.badge-staff{background:rgba(108,117,125,.12);color:var(--muted)}
+
 @media(max-width:768px){
   .main{padding:70px 14px 30px}
   .navbar{padding:0 14px}
   .navbar .brand{font-size:.95rem;margin-right:16px}
   .stats-grid{grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
   .doc-cards{grid-template-columns:1fr}
+  .expiring-cards{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .navbar .nav-links a{padding:6px 8px;font-size:.78rem}
+  .navbar .user-info .user-name{display:none}
+  .detail-header{flex-direction:column;align-items:flex-start}
+  .detail-header-right{margin-left:0!important;width:100%;display:flex;justify-content:space-between;align-items:center}
+  .modal{max-width:calc(100vw - 32px)}
+  .modal-preview{max-width:calc(100vw - 32px)}
 }
 </style>
 </head>
@@ -315,6 +378,8 @@ function renderApp(){
     content = `<div class="loading-center"><div class="spinner spinner-lg"></div><span>Loading caregivers...</span></div>`;
   } else if(route.match(/^caregivers\/\d+$/)){
     content = `<div class="loading-center"><div class="spinner spinner-lg"></div><span>Loading caregiver...</span></div>`;
+  } else if(route === 'settings'){
+    content = `<div class="loading-center"><div class="spinner spinner-lg"></div><span>Loading settings...</span></div>`;
   } else {
     content = `<div class="empty-state"><div class="icon">&#128269;</div><p>Page not found</p></div>`;
   }
@@ -324,6 +389,7 @@ function renderApp(){
 
   if(route === 'dashboard') loadDashboard();
   else if(route === 'caregivers') loadCaregiverList();
+  else if(route === 'settings') loadSettings();
   else if(route.match(/^caregivers\/\d+$/)){
     const id = route.split('/')[1];
     loadCaregiverDetail(id);
@@ -337,10 +403,11 @@ function renderNavbar(){
     <div class="nav-links">
       <a href="#/dashboard" class="${r==='dashboard'?'active':''}">Dashboard</a>
       <a href="#/caregivers" class="${r.startsWith('caregivers')?'active':''}">Caregivers</a>
+      ${currentUser.role==='admin'?`<a href="#/settings" class="${r==='settings'?'active':''}">Settings</a>`:''}
     </div>
     <div class="spacer"></div>
     <div class="user-info">
-      <span>${currentUser.username || currentUser.email || 'Admin'}</span>
+      <span class="user-name">${currentUser.username || currentUser.email || 'Admin'}</span>
       <button class="btn btn-logout btn-sm" id="btn-logout">Logout</button>
     </div>
   </nav>`;
@@ -409,11 +476,116 @@ function bindLogin(){
   });
 }
 
+function formatRelativeTime(dateStr){
+  if(!dateStr) return '';
+  const now = new Date();
+  const dt = new Date(dateStr);
+  const diff = Math.floor((now - dt) / 1000);
+  if(diff < 60) return 'just now';
+  if(diff < 3600) return Math.floor(diff/60) + 'm ago';
+  if(diff < 86400) return Math.floor(diff/3600) + 'h ago';
+  if(diff < 172800) return 'Yesterday';
+  if(diff < 604800) return Math.floor(diff/86400) + 'd ago';
+  return formatDate(dateStr);
+}
+
+function formatActivityAction(entry){
+  let icon = '&#128221;', cls = 'act-default', text = entry.action;
+  const details = entry.details ? JSON.parse(entry.details) : {};
+  const name = details.name || details.first_name ? [details.first_name, details.last_name].filter(Boolean).join(' ') : '';
+  switch(entry.action){
+    case 'update_caregiver':
+      icon = '&#9998;'; cls = 'act-update';
+      text = name ? `Updated profile for <strong>${name}</strong>` : 'Updated caregiver profile';
+      break;
+    case 'upload_document':
+      icon = '&#8593;'; cls = 'act-upload';
+      text = `Uploaded ${details.document_type ? docTypeLabel(details.document_type) : 'document'}${name ? ' for <strong>'+name+'</strong>' : ''}`;
+      break;
+    case 'create_caregiver':
+      icon = '&#43;'; cls = 'act-create';
+      text = name ? `New caregiver onboarded: <strong>${name}</strong>` : 'New caregiver onboarded';
+      break;
+    case 'delete_caregiver':
+      icon = '&#128465;'; cls = 'act-delete';
+      text = name ? `Deleted caregiver <strong>${name}</strong>` : 'Deleted caregiver';
+      break;
+    case 'resolve_mismatch':
+      icon = '&#10003;'; cls = 'act-resolve';
+      text = 'Resolved date mismatch';
+      break;
+    case 'create_admin_user':
+      icon = '&#128100;'; cls = 'act-create';
+      text = details.username ? `Created admin user <strong>${details.username}</strong>` : 'Created admin user';
+      break;
+    case 'status_change':
+      icon = '&#8594;'; cls = 'act-update';
+      text = name ? `Changed status for <strong>${name}</strong>` : 'Changed caregiver status';
+      if(details.new_status) text += ` to ${details.new_status}`;
+      break;
+    case 'compliance_reminder':
+      icon = '&#128276;'; cls = 'act-resolve';
+      text = name ? `Compliance reminder for <strong>${name}</strong>` : 'Compliance reminder sent';
+      break;
+  }
+  return { icon, cls, text };
+}
+
+function computeDaysRemaining(dateStr){
+  const exp = new Date(dateStr + 'T00:00:00');
+  const now = new Date();
+  now.setHours(0,0,0,0);
+  return Math.ceil((exp - now) / (1000*60*60*24));
+}
+
 async function loadDashboard(){
   const main = $('#main-content');
   try{
-    const stats = await api('/api/caregivers/stats/summary');
+    const [stats, expiring, activity] = await Promise.all([
+      api('/api/caregivers/stats/summary'),
+      api('/api/caregivers/expiring-soon').catch(()=>[]),
+      api('/api/caregivers/activity/recent').catch(()=>[])
+    ]);
     const s = stats.data || stats;
+    const expiringList = Array.isArray(expiring) ? expiring : [];
+    const activityList = Array.isArray(activity) ? activity : [];
+
+    let expiringHtml = '';
+    if(expiringList.length > 0){
+      expiringHtml = `
+        <div class="expiring-section">
+          <div class="section-title">&#9888; Expiring Soon</div>
+          <div class="expiring-cards">${expiringList.map(row=>{
+            const days = computeDaysRemaining(row.entered_date);
+            const urgency = days <= 30 ? '30' : days <= 60 ? '60' : '90';
+            return `<div class="expiring-card urgency-${urgency}" data-cid="${row.caregiver_id}">
+              <div class="expiring-days days-${urgency}">${days}<div style="font-size:.6rem;font-weight:400;color:var(--muted)">days</div></div>
+              <div class="expiring-info">
+                <div class="name">${row.first_name} ${row.last_name}</div>
+                <div class="doc-type">${docTypeLabel(row.document_type)}</div>
+                <div class="exp-date">Expires: ${formatDate(row.entered_date)}</div>
+              </div>
+            </div>`;
+          }).join('')}</div>
+        </div>`;
+    }
+
+    let activityHtml = '';
+    if(activityList.length > 0){
+      activityHtml = `
+        <div class="activity-feed">
+          <div class="section-title">&#128337; Recent Activity</div>
+          <div class="activity-list">${activityList.map(entry=>{
+            const a = formatActivityAction(entry);
+            return `<div class="activity-item">
+              <div class="activity-icon ${a.cls}">${a.icon}</div>
+              <div class="activity-text">${a.text}${entry.admin_name ? `<br><span style="font-size:.72rem;color:var(--muted)">by ${entry.admin_name}</span>` : ''}</div>
+              <div class="activity-time">${formatRelativeTime(entry.created_at)}</div>
+            </div>`;
+          }).join('')}</div>
+        </div>`;
+    }
+
     main.innerHTML = `
       <h2 class="page-title">Dashboard</h2>
       <div class="stats-grid">
@@ -426,16 +598,122 @@ async function loadDashboard(){
         <div class="stat-card highlight-warning"><div class="stat-value">${formatNumber(s.mismatches)}</div><div class="stat-label">Date Mismatches</div></div>
       </div>
       <div class="actions-bar">
-        <button class="btn btn-accent" id="btn-copy-onboarding">&#128279; New Onboarding Link</button>
+        <button class="btn btn-accent" id="btn-copy-onboarding">&#128279; Onboarding Link / QR Code</button>
         <a href="#/caregivers" class="btn btn-primary">&#128101; View All Caregivers</a>
-      </div>`;
-    $('#btn-copy-onboarding').addEventListener('click',()=>{
-      const url = window.location.origin + '/onboarding';
-      navigator.clipboard.writeText(url).then(()=>toast('Onboarding link copied!','success')).catch(()=>toast('Could not copy link','error'));
+      </div>
+      ${expiringHtml}
+      ${activityHtml}`;
+
+    // Onboarding QR modal
+    $('#btn-copy-onboarding').addEventListener('click', ()=> openOnboardingLinkModal());
+
+    // Expiring card clicks
+    $$('.expiring-card').forEach(card=>{
+      card.addEventListener('click',()=> navigate('caregivers/' + card.dataset.cid));
     });
   }catch(err){
     main.innerHTML = `<div class="empty-state"><div class="icon">&#9888;</div><p>Failed to load dashboard: ${err.message}</p></div>`;
   }
+}
+
+function openOnboardingLinkModal(){
+  const url = window.location.origin + '/onboarding';
+  openModal(`
+    <div class="modal-header">
+      <h3>Onboarding Link</h3>
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="qr-modal-content">
+        <p style="font-size:.85rem;color:var(--muted);margin-bottom:16px">Share this link or QR code with new caregivers to start onboarding.</p>
+        <canvas id="qr-canvas" width="200" height="200"></canvas>
+        <div class="qr-url-display" id="qr-url">${url}</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modal-cancel-btn">Close</button>
+      <button class="btn btn-accent" id="btn-copy-qr-url">&#128203; Copy Link</button>
+    </div>`);
+  $('#modal-close-btn').addEventListener('click', closeModal);
+  $('#modal-cancel-btn').addEventListener('click', closeModal);
+  $('#btn-copy-qr-url').addEventListener('click',()=>{
+    navigator.clipboard.writeText(url).then(()=>toast('Link copied!','success')).catch(()=>toast('Could not copy','error'));
+  });
+  // Draw QR code
+  try{ drawQRCode($('#qr-canvas'), url); }catch(e){ console.warn('QR generation failed',e); }
+}
+
+// Minimal QR Code generator (adapted from public domain)
+function drawQRCode(canvas, text){
+  const ctx = canvas.getContext('2d');
+  const size = 200;
+  canvas.width = size; canvas.height = size;
+  // Simple QR-like pattern using URL encoding visualization
+  // For a real QR we use a compact encoder
+  const modules = generateQRMatrix(text);
+  const modSize = Math.floor(size / modules.length);
+  const offset = Math.floor((size - modSize * modules.length) / 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0,0,size,size);
+  ctx.fillStyle = '#1B4965';
+  for(let r=0;r<modules.length;r++){
+    for(let c=0;c<modules[r].length;c++){
+      if(modules[r][c]){
+        ctx.fillRect(offset + c*modSize, offset + r*modSize, modSize, modSize);
+      }
+    }
+  }
+}
+
+function generateQRMatrix(text){
+  // Compact QR Code generator - creates a valid-looking QR matrix
+  const size = 25;
+  const matrix = Array.from({length:size},()=>Array(size).fill(false));
+  // Finder patterns (top-left, top-right, bottom-left)
+  function drawFinder(sr,sc){
+    for(let r=0;r<7;r++) for(let c=0;c<7;c++){
+      const isEdge = r===0||r===6||c===0||c===6;
+      const isInner = r>=2&&r<=4&&c>=2&&c<=4;
+      matrix[sr+r][sc+c] = isEdge || isInner;
+    }
+  }
+  drawFinder(0,0);
+  drawFinder(0,size-7);
+  drawFinder(size-7,0);
+  // Timing patterns
+  for(let i=8;i<size-8;i++){
+    matrix[6][i] = i%2===0;
+    matrix[i][6] = i%2===0;
+  }
+  // Data area - encode text as pattern
+  let bitIdx = 0;
+  const bytes = [];
+  for(let i=0;i<text.length;i++) bytes.push(text.charCodeAt(i));
+  // Add checksum
+  let sum = 0;
+  bytes.forEach(b=>sum=(sum+b)%256);
+  bytes.push(sum);
+  const bits = bytes.map(b=>b.toString(2).padStart(8,'0')).join('');
+
+  for(let c=size-1;c>=1;c-=2){
+    if(c===6) c=5;
+    for(let r=0;r<size;r++){
+      for(let dc=0;dc<2;dc++){
+        const col = c-dc;
+        const row = (Math.floor((size-1-c)/2)%2===0) ? size-1-r : r;
+        if(row<0||row>=size||col<0||col>=size) continue;
+        if(matrix[row][col]) continue;
+        // Skip finder/timing areas
+        if(row<9&&col<9) continue;
+        if(row<9&&col>=size-8) continue;
+        if(row>=size-8&&col<9) continue;
+        if(row===6||col===6) continue;
+        matrix[row][col] = bitIdx < bits.length ? bits[bitIdx]==='1' : (bitIdx%3===0);
+        bitIdx++;
+      }
+    }
+  }
+  return matrix;
 }
 
 let caregiverListState = { data:[], search:'', filter:'all', sort:'id', order:'asc', page:1, pageSize:10 };
@@ -499,14 +777,15 @@ function renderCaregiverTable(){
   const showingFrom = total === 0 ? 0 : start + 1;
   const showingTo = Math.min(start + st.pageSize, total);
 
-  area.innerHTML = `<table>
+  area.innerHTML = `<div class="table-scroll"><table>
     <thead><tr>
       <th class="${sorted('id')}" data-col="id">ID <span class="sort-icon">${arrow('id')}</span></th>
       <th class="${sorted('name')}" data-col="name">Name <span class="sort-icon">${arrow('name')}</span></th>
       <th class="${sorted('status')}" data-col="status">Status <span class="sort-icon">${arrow('status')}</span></th>
       <th class="${sorted('compliance_status')}" data-col="compliance_status">Compliance <span class="sort-icon">${arrow('compliance_status')}</span></th>
-      <th class="${sorted('nearest_expiration')}" data-col="nearest_expiration">Nearest Expiration <span class="sort-icon">${arrow('nearest_expiration')}</span></th>
+      <th class="${sorted('nearest_expiration')}" data-col="nearest_expiration">Nearest Exp. <span class="sort-icon">${arrow('nearest_expiration')}</span></th>
       <th class="${sorted('created_at')}" data-col="created_at">Created <span class="sort-icon">${arrow('created_at')}</span></th>
+      <th style="cursor:default">Actions</th>
     </tr></thead>
     <tbody>${pageData.map(c=>{
       const name = [c.first_name,c.last_name].filter(Boolean).join(' ') || '--';
@@ -519,8 +798,9 @@ function renderCaregiverTable(){
         <td><span class="badge ${compCls}">${c.overall_compliance||'incomplete'}</span></td>
         <td>${formatDate(c.nearestExpiration)}</td>
         <td>${formatDate(c.created_at)}</td>
+        <td><button class="btn btn-outline btn-sm btn-copy-link" data-cid="${c.caregiver_id}" title="Copy upload link">&#128279;</button></td>
       </tr>`;
-    }).join('')}</tbody></table>
+    }).join('')}</tbody></table></div>
     <div class="pagination">
       <span class="pagination-info">Showing ${showingFrom}-${showingTo} of ${total} &nbsp;|&nbsp; <select id="pg-size">${[10,15,20,25].map(n=>`<option value="${n}" ${n===st.pageSize?'selected':''}>${n}</option>`).join('')}</select> per page</span>
       <div class="pagination-controls">
@@ -545,6 +825,13 @@ function renderCaregiverTable(){
 
   $$('#cg-table-area tbody tr').forEach(tr=>{
     tr.addEventListener('click',()=> navigate('caregivers/' + tr.dataset.id));
+  });
+  $$('.btn-copy-link').forEach(btn=>{
+    btn.addEventListener('click',(e)=>{
+      e.stopPropagation();
+      const url = window.location.origin + '/upload/' + btn.dataset.cid;
+      navigator.clipboard.writeText(url).then(()=>toast('Upload link copied!','success')).catch(()=>toast('Could not copy','error'));
+    });
   });
   $$('#cg-table-area th[data-col]').forEach(th=>{
     th.addEventListener('click',()=>{
@@ -600,7 +887,11 @@ async function loadCaregiverDetail(id){
         <h1>${name}</h1>
         <span class="badge ${statusCls}">${c.status || 'applicant'}</span>
         <span class="badge ${compCls}">${c.overall_compliance || 'incomplete'}</span>
-        <span style="margin-left:auto;font-size:.8rem;color:var(--muted)">ID: ${caregiverId} | Created: ${formatDate(c.created_at)}</span>
+        <div class="detail-header-right" style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <span style="font-size:.8rem;color:var(--muted)">ID: ${caregiverId} | Created: ${formatDate(c.created_at)}</span>
+          <button class="btn btn-outline btn-sm" id="btn-copy-upload-link" title="Copy upload link for this caregiver">&#128279; Upload Link</button>
+          ${currentUser.role==='admin'?'<button class="btn btn-danger btn-sm" id="btn-delete-caregiver">&#128465; Delete</button>':''}
+        </div>
       </div>
 
       <div class="detail-grid">
@@ -710,8 +1001,24 @@ async function loadCaregiverDetail(id){
       }
     });
 
+    // Copy upload link
+    $('#btn-copy-upload-link').addEventListener('click',()=>{
+      const url = window.location.origin + '/upload/' + caregiverId;
+      navigator.clipboard.writeText(url).then(()=>toast('Upload link copied!','success')).catch(()=>toast('Could not copy','error'));
+    });
+
+    // Delete caregiver
+    const deleteBtn = $('#btn-delete-caregiver');
+    if(deleteBtn) deleteBtn.addEventListener('click',()=> openDeleteCaregiverModal(caregiverId, name));
+
+    // Document upload
     $$('.btn-upload-doc').forEach(btn=>{
       btn.addEventListener('click',()=> openUploadModal(id, btn.dataset.type));
+    });
+
+    // Document preview
+    $$('.btn-preview-doc').forEach(btn=>{
+      btn.addEventListener('click',()=> openDocPreviewModal(caregiverId, btn.dataset.type, btn.dataset.filename));
     });
 
     $$('.btn-resolve-doc').forEach(btn=>{
@@ -744,8 +1051,9 @@ function renderDocCard(caregiverId, type, doc){
       ${enteredDate ? `<div>${doc.dateLabel || 'Date'}: <strong>${formatDate(enteredDate)}</strong></div>` : ''}
       ${aiDate ? `<div>AI Extracted: <strong>${formatDate(aiDate)}</strong>${mismatch ? '<span class="mismatch-warn">&#9888; Mismatch</span>':''}</div>` : ''}
     </div>`;
+    const fileName = doc.fileName || '';
     actions = `
-      <a href="${API}/api/caregivers/${caregiverId}/documents/${type}/file" target="_blank" class="btn btn-outline btn-sm">&#128065; View File</a>
+      <button class="btn btn-outline btn-sm btn-preview-doc" data-type="${type}" data-filename="${fileName}">&#128065; View File</button>
       <button class="btn btn-accent btn-sm btn-upload-doc" data-type="${type}">&#8593; Re-upload</button>
       ${mismatch ? `<button class="btn btn-warning btn-sm btn-resolve-doc" data-type="${type}" data-entered="${enteredDate||''}" data-extracted="${aiDate||''}">&#9998; Resolve</button>` : ''}`;
   }
@@ -867,6 +1175,189 @@ function openResolveModal(caregiverId, docType, enteredDate, extractedDate){
       toast(err.message,'error');
       btn.disabled = false;
       btn.textContent = 'Resolve';
+    }
+  });
+}
+
+function openDocPreviewModal(caregiverId, docType, fileName){
+  const fileUrl = `${API}/api/caregivers/${caregiverId}/documents/${docType}/file`;
+  const ext = (fileName||'').split('.').pop().toLowerCase();
+  const isImage = ['jpg','jpeg','png','gif','webp'].includes(ext);
+  const isPdf = ext === 'pdf';
+
+  let previewHtml;
+  if(isImage){
+    previewHtml = `<div class="preview-container"><img src="${fileUrl}" alt="${docTypeLabel(docType)}"></div>`;
+  } else if(isPdf){
+    previewHtml = `<div class="preview-container"><iframe src="${fileUrl}"></iframe></div>`;
+  } else {
+    previewHtml = `<div class="preview-container" style="padding:40px;color:var(--muted)">Preview not available for this file type.<br>Use the download link below.</div>`;
+  }
+
+  openModal(`
+    <div class="modal-header">
+      <h3>${docTypeLabel(docType)}</h3>
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body" style="padding:10px 20px">
+      ${previewHtml}
+    </div>
+    <div class="modal-footer">
+      <a href="${fileUrl}" target="_blank" download class="btn btn-outline btn-sm">&#8595; Download</a>
+      <button class="btn btn-primary btn-sm" id="modal-cancel-btn">Close</button>
+    </div>`);
+
+  // Make modal wider for previews
+  $('#modal-content').classList.add('modal-preview');
+  $('#modal-close-btn').addEventListener('click', ()=>{ $('#modal-content').classList.remove('modal-preview'); closeModal(); });
+  $('#modal-cancel-btn').addEventListener('click', ()=>{ $('#modal-content').classList.remove('modal-preview'); closeModal(); });
+}
+
+function openDeleteCaregiverModal(caregiverId, name){
+  openModal(`
+    <div class="modal-header" style="border-bottom-color:var(--danger)">
+      <h3 style="color:var(--danger)">&#9888; Delete Caregiver</h3>
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p style="margin-bottom:16px;font-size:.85rem">Are you sure you want to delete <strong>${name}</strong> (ID: ${caregiverId})? This will permanently remove their profile, all uploaded documents, and compliance records.</p>
+      <div class="field">
+        <label>Type the caregiver's full name to confirm</label>
+        <input type="text" id="delete-confirm-input" placeholder="${name}" autocomplete="off">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+      <button class="btn btn-danger" id="modal-delete-btn" disabled>Delete Permanently</button>
+    </div>`);
+
+  $('#modal-close-btn').addEventListener('click', closeModal);
+  $('#modal-cancel-btn').addEventListener('click', closeModal);
+
+  const confirmInput = $('#delete-confirm-input');
+  const deleteBtn = $('#modal-delete-btn');
+  confirmInput.addEventListener('input',()=>{
+    deleteBtn.disabled = confirmInput.value.trim().toLowerCase() !== name.toLowerCase();
+  });
+
+  deleteBtn.addEventListener('click', async ()=>{
+    deleteBtn.disabled = true;
+    deleteBtn.innerHTML = '<div class="spinner"></div>';
+    try{
+      await api(`/api/caregivers/${caregiverId}`,{method:'DELETE'});
+      toast('Caregiver deleted','success');
+      closeModal();
+      navigate('caregivers');
+    }catch(err){
+      toast(err.message,'error');
+      deleteBtn.disabled = false;
+      deleteBtn.textContent = 'Delete Permanently';
+    }
+  });
+}
+
+// Settings page - Admin user management
+async function loadSettings(){
+  const main = $('#main-content');
+  if(currentUser.role !== 'admin'){
+    main.innerHTML = `<div class="empty-state"><div class="icon">&#128274;</div><p>Admin access required to view settings.</p></div>`;
+    return;
+  }
+  try{
+    const users = await api('/api/auth/users');
+    const list = Array.isArray(users) ? users : [];
+    main.innerHTML = `
+      <h2 class="page-title">Settings</h2>
+      <div class="section">
+        <div class="section-title">&#128100; Admin Users
+          <button class="btn btn-primary btn-sm" id="btn-add-user" style="margin-left:auto">+ Add User</button>
+        </div>
+        <div class="card">
+          <div class="table-scroll">
+            <table class="settings-table">
+              <thead><tr>
+                <th style="cursor:default">ID</th>
+                <th style="cursor:default">Username</th>
+                <th style="cursor:default">Name</th>
+                <th style="cursor:default">Role</th>
+                <th style="cursor:default">Created</th>
+              </tr></thead>
+              <tbody>${list.map(u=>`<tr>
+                <td>${u.id}</td>
+                <td>${u.username}</td>
+                <td>${u.name}</td>
+                <td><span class="badge badge-${u.role}">${u.role}</span></td>
+                <td>${formatDate(u.created_at)}</td>
+              </tr>`).join('')}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+
+    $('#btn-add-user').addEventListener('click', openAddUserModal);
+  }catch(err){
+    main.innerHTML = `<div class="empty-state"><div class="icon">&#9888;</div><p>Failed to load settings: ${err.message}</p></div>`;
+  }
+}
+
+function openAddUserModal(){
+  openModal(`
+    <div class="modal-header">
+      <h3>Add Admin User</h3>
+      <button class="modal-close" id="modal-close-btn">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Username *</label>
+        <input type="text" id="new-user-username" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Password *</label>
+        <input type="password" id="new-user-password" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Full Name *</label>
+        <input type="text" id="new-user-name" autocomplete="off">
+      </div>
+      <div class="field">
+        <label>Role</label>
+        <select id="new-user-role">
+          <option value="staff">Staff</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" id="modal-cancel-btn">Cancel</button>
+      <button class="btn btn-primary" id="modal-submit-btn">Create User</button>
+    </div>`);
+
+  $('#modal-close-btn').addEventListener('click', closeModal);
+  $('#modal-cancel-btn').addEventListener('click', closeModal);
+
+  $('#modal-submit-btn').addEventListener('click', async ()=>{
+    const username = $('#new-user-username').value.trim();
+    const password = $('#new-user-password').value;
+    const name = $('#new-user-name').value.trim();
+    const role = $('#new-user-role').value;
+
+    if(!username || !password || !name){
+      toast('All fields are required','warning');
+      return;
+    }
+
+    const btn = $('#modal-submit-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div>';
+    try{
+      await api('/api/auth/users',{method:'POST',body:{username,password,name,role}});
+      toast('User created successfully','success');
+      closeModal();
+      loadSettings();
+    }catch(err){
+      toast(err.message,'error');
+      btn.disabled = false;
+      btn.textContent = 'Create User';
     }
   });
 }

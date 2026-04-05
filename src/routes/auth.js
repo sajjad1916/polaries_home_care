@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const { v4: uuidv4 } = require('uuid');
 const { getDb } = require('../../db/database');
 const settings = require('../../config/settings');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireAdmin } = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -59,6 +59,48 @@ router.post('/logout', (req, res) => {
 
 router.get('/me', requireAuth, (req, res) => {
   res.json({ user: req.admin });
+});
+
+// List all admin users (admin only)
+router.get('/users', requireAdmin, (req, res) => {
+  try {
+    const db = getDb();
+    const users = db.prepare('SELECT id, username, name, role, created_at FROM admin_users ORDER BY created_at ASC').all();
+    res.json(users);
+  } catch (err) {
+    console.error('[auth] List users error:', err);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+// Create admin user (admin only)
+router.post('/users', requireAdmin, async (req, res) => {
+  try {
+    const { username, password, name, role } = req.body;
+    if (!username || !password || !name) {
+      return res.status(400).json({ error: 'Username, password, and name are required' });
+    }
+    if (role && !['admin', 'staff'].includes(role)) {
+      return res.status(400).json({ error: 'Role must be admin or staff' });
+    }
+
+    const db = getDb();
+    const existing = db.prepare('SELECT id FROM admin_users WHERE username = ?').get(username);
+    if (existing) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+    const result = db.prepare('INSERT INTO admin_users (username, password_hash, name, role) VALUES (?, ?, ?, ?)').run(username, hash, name, role || 'staff');
+
+    db.prepare('INSERT INTO audit_log (action, entity_type, entity_id, admin_user_id, details) VALUES (?, ?, ?, ?, ?)')
+      .run('create_admin_user', 'admin_user', String(result.lastInsertRowid), req.admin.id, JSON.stringify({ username, name, role: role || 'staff' }));
+
+    res.json({ id: result.lastInsertRowid, username, name, role: role || 'staff' });
+  } catch (err) {
+    console.error('[auth] Create user error:', err);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
 });
 
 module.exports = router;
