@@ -262,6 +262,24 @@ body{
 .upload-zone-text{font-size:0.9rem;color:var(--text-muted)}
 .upload-zone-text strong{color:var(--accent);font-weight:600}
 .upload-zone-hint{font-size:0.75rem;color:var(--text-muted);margin-top:6px}
+.upload-methods{display:flex;gap:12px;align-items:stretch}
+.upload-methods .upload-zone{flex:1}
+.upload-divider{display:flex;align-items:center;color:var(--text-muted);font-size:0.8rem;font-weight:600;padding:0 2px}
+.upload-divider span{background:var(--bg);padding:4px 0}
+.camera-btn{flex:0 0 140px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:20px 12px;border:2px dashed var(--accent);border-radius:12px;background:rgba(98,182,203,0.04);color:var(--accent);cursor:pointer;font-family:inherit;font-size:0.9rem;font-weight:600;transition:all 0.2s}
+.camera-btn:hover{background:rgba(98,182,203,0.1);border-color:var(--primary);color:var(--primary)}
+.camera-btn svg{opacity:0.8}
+.camera-hint{font-size:0.7rem;font-weight:400;opacity:0.7}
+.show-mobile-only{display:none}
+@media(max-width:768px){
+  .show-mobile-only{display:flex}
+  .upload-methods{flex-direction:column}
+  .camera-btn{flex:0 0 auto;flex-direction:row;padding:14px 16px;gap:10px}
+  .camera-hint{display:none}
+}
+@media(pointer:coarse){
+  .show-mobile-only{display:flex}
+}
 
 /* File Preview */
 .file-preview{
@@ -597,11 +615,20 @@ body{
       html += '<div class="doc-card-body">';
 
       // Upload zone
+      html += '<div class="upload-methods">';
       html += '<div class="upload-zone" id="zone-' + idx + '" ondragover="window.__handleDragOver(event,' + idx + ')" ondragleave="window.__handleDragLeave(event,' + idx + ')" ondrop="window.__handleDrop(event,' + idx + ')">';
       html += '<input type="file" accept=".jpg,.jpeg,.png,.pdf,image/jpeg,image/png,application/pdf" onchange="window.__handleFileSelect(event,' + idx + ')" id="fileInput-' + idx + '">';
-      html += '<div class="upload-zone-icon"><svg width="40" height="40" viewBox="0 0 40 40" fill="none"><rect width="40" height="40" rx="10" fill="#E9ECEF"/><path d="M20 14v12M14 20h12" stroke="#6C757D" stroke-width="2" stroke-linecap="round"/></svg></div>';
-      html += '<div class="upload-zone-text"><strong>Click to browse</strong> or drag and drop</div>';
+      html += '<div class="upload-zone-icon"><svg width="36" height="36" viewBox="0 0 36 36" fill="none"><rect width="36" height="36" rx="8" fill="#E9ECEF"/><path d="M18 12v12M12 18h12" stroke="#6C757D" stroke-width="2" stroke-linecap="round"/></svg></div>';
+      html += '<div class="upload-zone-text"><strong>Browse files</strong> or drag and drop</div>';
       html += '<div class="upload-zone-hint">JPEG, PNG, or PDF - Max 10 MB</div>';
+      html += '</div>';
+      html += '<div class="upload-divider show-mobile-only"><span>or</span></div>';
+      html += '<button type="button" class="camera-btn show-mobile-only" onclick="window.__openCamera(' + idx + ')">';
+      html += '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>';
+      html += '<span>Take Photo</span>';
+      html += '<span class="camera-hint">Opens your device camera</span>';
+      html += '</button>';
+      html += '<input type="file" accept="image/jpeg,image/png" capture="environment" onchange="window.__handleFileSelect(event,' + idx + ')" id="cameraInput-' + idx + '" style="display:none">';
       html += '</div>';
 
       // File preview
@@ -696,6 +723,11 @@ body{
   };
 
   // Drag and drop handlers
+  window.__openCamera = function(idx) {
+    var cameraInput = document.getElementById('cameraInput-' + idx);
+    if (cameraInput) cameraInput.click();
+  };
+
   window.__handleDragOver = function(e, idx) {
     e.preventDefault();
     e.stopPropagation();
