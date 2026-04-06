@@ -6,11 +6,11 @@
 <title>Polaris Home Care - Admin Dashboard</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --primary:#1B4965;--accent:#62B6CB;--success:#2D6A4F;--danger:#D62828;
+  --primary:#072d5a;--accent:#ff8a02;--success:#2D6A4F;--danger:#D62828;
   --warning:#F77F00;--bg:#F8F9FA;--card:#FFFFFF;--text:#212529;
   --border:#DEE2E6;--muted:#6C757D;--shadow:0 1px 3px rgba(0,0,0,.08);
   --shadow-lg:0 4px 12px rgba(0,0,0,.12);--radius:8px;
@@ -399,7 +399,7 @@ function renderApp(){
 function renderNavbar(){
   const r = getRoute();
   return `<nav class="navbar">
-    <div class="brand">Polaris Home Care</div>
+    <div class="brand"><img src="https://polarishomecare.com/wp-content/uploads/2021/03/Logo-Clear-1000x500-1.png" alt="Polaris Home Care" style="height:32px;filter:brightness(0) invert(1)"></div>
     <div class="nav-links">
       <a href="#/dashboard" class="${r==='dashboard'?'active':''}">Dashboard</a>
       <a href="#/caregivers" class="${r.startsWith('caregivers')?'active':''}">Caregivers</a>
@@ -426,7 +426,7 @@ function renderLoginPage(){
   return `<div class="login-wrapper">
     <div class="login-card">
       <div class="brand">
-        <h1>Polaris Home Care</h1>
+        <img src="https://polarishomecare.com/wp-content/uploads/2021/03/Logo-Clear-1000x500-1.png" alt="Polaris Home Care" style="max-width:220px;margin:0 auto 12px;display:block">
         <p>Staff Portal</p>
       </div>
       <div class="error-msg" id="login-error"></div>
